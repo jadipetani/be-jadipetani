@@ -38,6 +38,21 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Scalar API Documentation UI
+const { apiReference } = require('@scalar/express-api-reference');
+const openApiSpec = require('./config/swagger');
+
+app.get('/api-spec.json', (_req, res) => res.json(openApiSpec));
+app.use(
+  '/docs',
+  apiReference({
+    spec: {
+      content: openApiSpec,
+    },
+    theme: 'purple',
+  })
+);
+
 // ============================================
 // Routes
 // ============================================
