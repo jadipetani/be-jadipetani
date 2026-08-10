@@ -51,4 +51,11 @@ const uploadApplication = multer({
   { name: 'portfolio', maxCount: 1 },
 ]);
 
-module.exports = { uploadCV, uploadPortfolio, uploadDocumentation, uploadApplication };
+// Upload Avatar (single image, max 5MB)
+const uploadAvatar = multer({
+  storage,
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: fileFilter(['image/jpeg', 'image/png', 'image/webp']),
+}).single('avatar');
+
+module.exports = { uploadCV, uploadPortfolio, uploadDocumentation, uploadApplication, uploadAvatar };

@@ -247,6 +247,41 @@ async function runTests() {
     if (res.status !== 200 || res.body.data.location !== 'Pekanbaru, Riau') throw new Error(`Status ${res.status}`);
   });
 
+  // 7. Bookmarks & Profile Completion Module
+  await test('GET /api/users/profile/completion should return profile completion percentage', async () => {
+    const res = await request('/api/users/profile/completion', { token: studentToken });
+    if (res.status !== 200 || res.body.data.completionPercentage === undefined) throw new Error(`Status ${res.status}`);
+  });
+
+  let bookmarkId;
+  await test('POST /api/bookmarks should bookmark an internship', async () => {
+    const res = await request('/api/bookmarks', {
+      method: 'POST',
+      token: studentToken,
+      body: { internshipId },
+    });
+    if (res.status !== 201) throw new Error(`Status ${res.status}: ${res.body.message}`);
+    bookmarkId = res.body.data.id;
+  });
+
+  await test('GET /api/bookmarks/my should return student bookmarks list', async () => {
+    const res = await request('/api/bookmarks/my', { token: studentToken });
+    if (res.status !== 200 || res.body.data.length === 0) throw new Error(`Status ${res.status}`);
+  });
+
+  await test('DELETE /api/bookmarks/:id should remove bookmark', async () => {
+    const res = await request(`/api/bookmarks/${bookmarkId}`, {
+      method: 'DELETE',
+      token: studentToken,
+    });
+    if (res.status !== 200) throw new Error(`Status ${res.status}`);
+  });
+
+  await test('GET /api/my-internships should return enrolled internships list for student', async () => {
+    const res = await request('/api/my-internships', { token: studentToken });
+    if (res.status !== 200 || !Array.isArray(res.body.data)) throw new Error(`Status ${res.status}`);
+  });
+
   await test('DELETE /api/jobs/:id should delete job', async () => {
     const res = await request(`/api/jobs/${jobId}`, {
       method: 'DELETE',

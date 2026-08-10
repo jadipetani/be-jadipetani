@@ -326,4 +326,120 @@ router.delete('/:id', auth, authorize('FARMER'), async (req, res, next) => {
   }
 });
 
+// POST /api/jobs/:id/apply — Apply lowongan kerja (Pelajar)
+router.post('/:id/apply', auth, authorize('STUDENT'), require('../../middlewares/upload').uploadApplication, async (req, res, next) => {
+  try {
+    const jobId = req.params.id;
+    const studentId = req.user.id;
+
+    const job = await prisma.job.findFirst({
+      where: { id: jobId, status: 'PUBLISHED' },
+    });
+    if (!job) throw ApiError.badRequest('Lowongan kerja tidak aktif atau tidak ditemukan');
+
+    const existing = await prisma.application.findFirst({
+      where: { studentId, jobId },
+    });
+    if (existing) throw ApiError.badRequest('Anda sudah melamar ke lowongan kerja ini');
+
+    if (!req.files?.cv?.[0]) throw ApiError.badRequest('CV wajib diupload');
+
+    const cvFile = req.files.cv[0];
+    const { uploadToSupabase } = require('../../utils/fileUpload');
+    const cvResult = await uploadToSupabase(cvFile.buffer, cvFile.originalname, 'cv', studentId);
+
+    let portfolioResult = null;
+    if (req.files?.portfolio?.[0]) {
+      const portfolioFile = req.files.portfolio[0];
+      portfolioResult = await uploadToSupabase(portfolioFile.buffer, portfolioFile.originalname, 'portfolios', studentId);
+    }
+
+    const application = await prisma.application.create({
+      data: {
+        type: 'JOB',
+        studentId,
+        jobId,
+        cvUrl: cvResult.url,
+        cvPath: cvResult.filePath,
+        portfolioUrl: portfolioResult?.url || null,
+        portfolioPath: portfolioResult?.filePath || null,
+        motivation: req.body.motivation || 'Lamaran Pekerjaan Profesional',
+        status: 'REVIEW',
+      },
+    });
+
+    return success(res, { statusCode: 201, message: 'Lamaran pekerjaan berhasil dikirim', data: application });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/jobs/:id/applicants — List pendaftar lowongan kerja (Petani)
+router.get('/:id/applicants', auth, authorize('FARMER'), async (req, res, next) => {
+  try {
+    const job = await prisma.job.findFirst({
+      where: { id: req.params.id, userId: req.user.id },
+    });
+    if (!job) throw ApiError.notFound('Lowongan kerja tidak ditemukan');
+
+    const { page, limit, skip } = paginate(req.query);
+    const where = { jobId: req.params.id, type: 'JOB' };
+
+    if (req.query.status) where.status = req.query.status;
+
+    const [applications, total] = await Promise.all([
+      prisma.application.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true, status: true, createdAt: true,
+          student: { select: { id: true, fullName: true, institution: true, email: true, phone: true } },
+        },
+      }),
+      prisma.application.count({ where }),
+    ]);
+
+    return success(res, {
+      data: applications,
+      meta: paginationMeta(total, page, limit),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/jobs/:id/payment-status — Cek status transaksi langsung ke Midtrans API
+router.get('/:id/payment-status', auth, authorize('FARMER'), async (req, res, next) => {
+  try {
+    const job = await prisma.job.findFirst({
+      where: { id: req.params.id, userId: req.user.id },
+    });
+    if (!job) throw ApiError.notFound('Lowongan kerja tidak ditemukan');
+    if (!job.orderId) throw ApiError.badRequest('Lowongan belum memiliki order ID transaksi');
+
+    let statusResponse;
+    try {
+      statusResponse = await snap.transaction.notification({ order_id: job.orderId });
+    } catch (midtransErr) {
+      throw ApiError.badRequest('Gagal mengecek status ke Midtrans: ' + midtransErr.message);
+    }
+
+    return success(res, {
+      data: {
+        jobId: job.id,
+        orderId: job.orderId,
+        status: job.status,
+        midtransStatus: statusResponse.transaction_status,
+        grossAmount: statusResponse.gross_amount,
+        paymentType: statusResponse.payment_type,
+        transactionTime: statusResponse.transaction_time,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

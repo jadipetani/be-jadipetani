@@ -72,6 +72,7 @@ model User {
   address       String?
   institution   String?
   bio           String?
+  avatarUrl     String?
   agreedToTerms Boolean   @default(false)
 
   // Reset password
@@ -87,6 +88,7 @@ model User {
   applications Application[]
   certificates Certificate[]
   jobs         Job[]
+  bookmarks    Bookmark[]
 
   @@map("users")
 }
@@ -119,6 +121,7 @@ model Internship {
   // Relations
   curriculumWeeks CurriculumWeek[]
   applications    Application[]
+  bookmarks       Bookmark[]
 
   @@map("internships")
 }
@@ -324,6 +327,7 @@ model Job {
   // Relations
   applications Application[]
   paymentLogs  PaymentLog[]
+  bookmarks    Bookmark[]
 
   @@map("jobs")
 }
@@ -344,4 +348,19 @@ model PaymentLog {
 
   @@index([orderId, status])
   @@map("payment_logs")
+}
+
+model Bookmark {
+  id           String      @id @default(uuid())
+  studentId    String
+  student      User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  internshipId String?
+  internship   Internship? @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  jobId        String?
+  job          Job?        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @default(now())
+
+  @@unique([studentId, internshipId])
+  @@unique([studentId, jobId])
+  @@map("bookmarks")
 }

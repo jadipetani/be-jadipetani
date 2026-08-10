@@ -201,6 +201,56 @@ const openApiSpec = {
         },
       },
     },
+    '/api/users/profile/completion': {
+      get: {
+        summary: 'Hitung Persentase Kelengkapan Profil',
+        tags: ['User Profile'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: 'Persentase kelengkapan profil (0-100%)' },
+        },
+      },
+    },
+    '/api/users/profile/avatar': {
+      post: {
+        summary: 'Upload Foto Profil ke Supabase Storage',
+        tags: ['User Profile'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: 'Foto profil berhasil diperbarui' },
+        },
+      },
+    },
+    '/api/bookmarks': {
+      post: {
+        summary: 'Bookmark Lowongan (Magang / Job)',
+        tags: ['Bookmarks'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          201: { description: 'Lowongan berhasil di-bookmark' },
+        },
+      },
+    },
+    '/api/bookmarks/my': {
+      get: {
+        summary: 'List Bookmark Milik Pelajar',
+        tags: ['Bookmarks'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: 'Daftar bookmark lowongan' },
+        },
+      },
+    },
+    '/api/my-internships': {
+      get: {
+        summary: 'List Program Magang Aktif/Lulus Milik Pelajar',
+        tags: ['My Internships'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: 'Daftar program magang yang diikuti' },
+        },
+      },
+    },
   },
 };
 

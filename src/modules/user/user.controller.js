@@ -10,6 +10,24 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+const getProfileCompletion = async (req, res, next) => {
+  try {
+    const data = await userService.getProfileCompletion(req.user.id);
+    return success(res, { data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const uploadAvatar = async (req, res, next) => {
+  try {
+    const user = await userService.uploadAvatar(req.user.id, req.file);
+    return success(res, { message: 'Foto profil berhasil diupload', data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateProfile = async (req, res, next) => {
   try {
     const user = await userService.updateProfile(req.user.id, req.body);
@@ -37,4 +55,4 @@ const deleteAccount = async (req, res, next) => {
   }
 };
 
-module.exports = { getProfile, updateProfile, changePassword, deleteAccount };
+module.exports = { getProfile, getProfileCompletion, uploadAvatar, updateProfile, changePassword, deleteAccount };

@@ -76,6 +76,8 @@ app.use('/api/dashboard', require('./modules/dashboard/dashboard.routes'));
 app.use('/api/landing', require('./modules/landing/landing.routes'));
 app.use('/api/jobs', require('./modules/job/job.routes'));
 app.use('/api/payments', require('./modules/payment/payment.routes'));
+app.use('/api/bookmarks', require('./modules/bookmark/bookmark.routes'));
+app.use('/api/my-internships', require('./modules/internship/my-internships.routes'));
 
 // Global error handler (HARUS terakhir)
 app.use(errorHandler);

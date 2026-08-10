@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const prisma = require('../../config/database');
 const ApiError = require('../../utils/apiError');
+const { uploadToSupabase } = require('../../utils/fileUpload');
 
 const SALT_ROUNDS = 12;
 
@@ -16,11 +17,47 @@ async function getProfile(userId) {
       address: true,
       institution: true,
       bio: true,
+      avatarUrl: true,
       createdAt: true,
     },
   });
   if (!user) throw ApiError.notFound('User tidak ditemukan');
   return user;
+}
+
+async function getProfileCompletion(userId) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw ApiError.notFound('User tidak ditemukan');
+
+  const fields = ['fullName', 'phone', 'address', 'institution', 'bio', 'avatarUrl'];
+  const filledCount = fields.filter((field) => !!user[field]).length;
+  const percentage = Math.round((filledCount / fields.length) * 100);
+
+  return {
+    completionPercentage: percentage,
+    filledFields: filledCount,
+    totalFields: fields.length,
+    isComplete: percentage === 100,
+  };
+}
+
+async function uploadAvatar(userId, file) {
+  if (!file) throw ApiError.badRequest('File avatar wajib diunggah');
+
+  const uploadResult = await uploadToSupabase(file.buffer, file.originalname, 'avatars', userId);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { avatarUrl: uploadResult.url },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      avatarUrl: true,
+    },
+  });
+
+  return updatedUser;
 }
 
 async function updateProfile(userId, data) {
@@ -36,6 +73,7 @@ async function updateProfile(userId, data) {
       address: true,
       institution: true,
       bio: true,
+      avatarUrl: true,
       createdAt: true,
     },
   });
@@ -63,4 +101,4 @@ async function deleteAccount(userId) {
   return { message: 'Akun berhasil dihapus' };
 }
 
-module.exports = { getProfile, updateProfile, changePassword, deleteAccount };
+module.exports = { getProfile, getProfileCompletion, uploadAvatar, updateProfile, changePassword, deleteAccount };
