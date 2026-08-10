@@ -469,10 +469,11 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['currentPassword', 'newPassword'],
+                required: ['currentPassword', 'newPassword', 'confirmNewPassword'],
                 properties: {
                   currentPassword: { type: 'string', example: 'password123' },
-                  newPassword: { type: 'string', example: 'newpassword456' },
+                  newPassword: { type: 'string', example: 'newpassword123' },
+                  confirmNewPassword: { type: 'string', example: 'newpassword123' },
                 },
               },
             },
@@ -481,6 +482,7 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
         responses: {
           200: { description: 'Password berhasil diubah' },
           401: { description: 'Password lama salah' },
+          422: { description: 'Konfirmasi password tidak cocok / validasi gagal' },
         },
       },
     },
@@ -590,6 +592,25 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
         tags: ['Internships'],
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string', example: 'Magang Budidaya Melon Organik' },
+                  commodity: { type: 'string', example: 'Melon Organik' },
+                  location: { type: 'string', example: 'Lembang Barat, Bandung' },
+                  durationMonths: { type: 'integer', example: 1 },
+                  quota: { type: 'integer', example: 5 },
+                  status: { type: 'string', enum: ['DRAFT', 'ACTIVE', 'CLOSED'], example: 'ACTIVE' },
+                  facilities: { type: 'string', example: 'Mes, makan siang, sertifikat' },
+                  description: { type: 'string', example: 'Program magang 1 bulan budidaya melon.' },
+                },
+              },
+            },
+          },
+        },
         responses: { 200: { description: 'Program magang diperbarui' } },
       },
       delete: {
@@ -660,6 +681,43 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
         tags: ['AI Curriculum'],
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['curriculum'],
+                properties: {
+                  curriculum: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      required: ['weekNumber', 'title', 'description', 'activities'],
+                      properties: {
+                        weekNumber: { type: 'integer', example: 1 },
+                        title: { type: 'string', example: 'Minggu 1: Olah Tanah' },
+                        description: { type: 'string', example: 'Persiapan bedengan lahan' },
+                        activities: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            required: ['name', 'description', 'weight'],
+                            properties: {
+                              name: { type: 'string', example: 'Penyangkulan' },
+                              description: { type: 'string', example: 'Gemburkan tanah' },
+                              weight: { type: 'integer', example: 50 },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
         responses: { 200: { description: 'Kurikulum berhasil disimpan' } },
       },
       delete: {
