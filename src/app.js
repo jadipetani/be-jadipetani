@@ -63,13 +63,13 @@ app.use(
 // ============================================
 app.use('/api/auth', require('./modules/auth/auth.routes'));
 app.use('/api/users', require('./modules/user/user.routes'));
-app.use('/api/internships', require('./modules/internship/internship.routes'));
 app.use('/api/internships', require('./modules/curriculum/curriculum.routes'));
 app.use('/api/internships', require('./modules/application/application.routes'));
-app.use('/api/applications', require('./modules/application/application.direct.routes'));
 app.use('/api/internships', require('./modules/logbook/logbook.routes'));
-app.use('/api/logbook', require('./modules/logbook/logbook.direct.routes'));
 app.use('/api/internships', require('./modules/evaluation/evaluation.routes'));
+app.use('/api/internships', require('./modules/internship/internship.routes'));
+app.use('/api/applications', require('./modules/application/application.direct.routes'));
+app.use('/api/logbook', require('./modules/logbook/logbook.direct.routes'));
 app.use('/api/evaluations', require('./modules/evaluation/evaluation.direct.routes'));
 app.use('/api/certificates', require('./modules/certificate/certificate.routes'));
 app.use('/api/dashboard', require('./modules/dashboard/dashboard.routes'));

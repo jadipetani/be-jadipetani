@@ -97,7 +97,13 @@ async function changePassword(userId, { currentPassword, newPassword }) {
 }
 
 async function deleteAccount(userId) {
-  await prisma.user.delete({ where: { id: userId } });
+  await prisma.$transaction(async (tx) => {
+    await tx.bookmark.deleteMany({ where: { studentId: userId } });
+    await tx.application.deleteMany({ where: { studentId: userId } });
+    await tx.job.deleteMany({ where: { userId } });
+    await tx.internship.deleteMany({ where: { userId } });
+    await tx.user.delete({ where: { id: userId } });
+  });
   return { message: 'Akun berhasil dihapus' };
 }
 
