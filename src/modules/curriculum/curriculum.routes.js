@@ -179,4 +179,22 @@ router.get('/:id/curriculum', async (req, res, next) => {
   }
 });
 
+// DELETE /api/internships/:id/curriculum — Hapus / reset kurikulum
+router.delete('/:id/curriculum', auth, authorize('FARMER'), async (req, res, next) => {
+  try {
+    const internship = await prisma.internship.findFirst({
+      where: { id: req.params.id, userId: req.user.id, deletedAt: null },
+    });
+    if (!internship) throw ApiError.notFound('Lowongan tidak ditemukan');
+    if (internship.status === 'ACTIVE') {
+      throw ApiError.badRequest('Kurikulum lowongan ACTIVE tidak bisa dihapus');
+    }
+
+    await prisma.curriculumWeek.deleteMany({ where: { internshipId: internship.id } });
+    return success(res, { message: 'Kurikulum berhasil dihapus' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

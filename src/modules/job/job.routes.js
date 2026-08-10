@@ -282,4 +282,48 @@ router.post('/:id/retry-payment', auth, authorize('FARMER'), async (req, res, ne
   }
 });
 
+// PUT /api/jobs/:id — Edit lowongan kerja
+router.put('/:id', auth, authorize('FARMER'), async (req, res, next) => {
+  try {
+    const job = await prisma.job.findFirst({
+      where: { id: req.params.id, userId: req.user.id },
+    });
+    if (!job) throw ApiError.notFound('Lowongan tidak ditemukan');
+
+    const updateData = { ...req.body };
+    if (req.body.offeredSalary) {
+      updateData.placementFee = Math.round(req.body.offeredSalary * PLACEMENT_FEE_RATE);
+    }
+
+    const updated = await prisma.job.update({
+      where: { id: job.id },
+      data: updateData,
+    });
+
+    return success(res, { message: 'Lowongan kerja berhasil diperbarui', data: updated });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/jobs/:id — Hapus lowongan kerja
+router.delete('/:id', auth, authorize('FARMER'), async (req, res, next) => {
+  try {
+    const job = await prisma.job.findFirst({
+      where: { id: req.params.id, userId: req.user.id },
+    });
+    if (!job) throw ApiError.notFound('Lowongan tidak ditemukan');
+
+    await prisma.$transaction([
+      prisma.paymentLog.deleteMany({ where: { jobId: job.id } }),
+      prisma.application.deleteMany({ where: { jobId: job.id } }),
+      prisma.job.delete({ where: { id: job.id } }),
+    ]);
+
+    return success(res, { message: 'Lowongan kerja berhasil dihapus' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

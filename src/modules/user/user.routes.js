@@ -4,7 +4,9 @@ const validate = require('../../middlewares/validate');
 const { updateProfileSchema, changePasswordSchema } = require('./user.schema');
 const controller = require('./user.controller');
 
+router.get('/profile', auth, controller.getProfile);
 router.put('/profile', auth, validate(updateProfileSchema), controller.updateProfile);
 router.put('/change-password', auth, validate(changePasswordSchema), controller.changePassword);
+router.delete('/me', auth, controller.deleteAccount);
 
 module.exports = router;

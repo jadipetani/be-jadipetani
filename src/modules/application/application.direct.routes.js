@@ -7,6 +7,42 @@ const ApiError = require('../../utils/apiError');
 const { getSignedUrl } = require('../../utils/fileUpload');
 const { sendEmail, applicationAcceptedEmail, applicationRejectedEmail } = require('../../utils/emailService');
 
+// GET /api/applications/my — List lamaran milik pelajar login (MUST BE BEFORE /:id)
+router.get('/my', auth, authorize('STUDENT'), async (req, res, next) => {
+  try {
+    const { paginate, paginationMeta } = require('../../utils/pagination');
+    const { page, limit, skip } = paginate(req.query);
+    const where = { studentId: req.user.id };
+
+    if (req.query.status) where.status = req.query.status;
+
+    const [applications, total] = await Promise.all([
+      prisma.application.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          internship: {
+            select: { id: true, title: true, commodity: true, location: true, user: { select: { fullName: true } } },
+          },
+          job: {
+            select: { id: true, title: true, location: true, offeredSalary: true, user: { select: { fullName: true } } },
+          },
+        },
+      }),
+      prisma.application.count({ where }),
+    ]);
+
+    return success(res, {
+      data: applications,
+      meta: paginationMeta(total, page, limit),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET /api/applications/:id — Detail lamaran
 router.get('/:id', auth, async (req, res, next) => {
   try {
@@ -87,7 +123,7 @@ router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) =>
 
       // 3. Auto-generate logbook entries & activities from curriculum
       for (const week of application.internship.curriculumWeeks) {
-        const logbookEntry = await tx.logbookEntry.create({
+        await tx.logbookEntry.create({
           data: {
             applicationId: application.id,
             weekNumber: week.weekNumber,
@@ -182,6 +218,26 @@ router.patch('/:id/cancel', auth, authorize('STUDENT'), async (req, res, next) =
     });
 
     return success(res, { message: 'Lamaran berhasil dibatalkan' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/applications/:id — Hapus lamaran (hanya status REVIEW)
+router.delete('/:id', auth, authorize('STUDENT'), async (req, res, next) => {
+  try {
+    const application = await prisma.application.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!application) throw ApiError.notFound('Lamaran tidak ditemukan');
+    if (application.studentId !== req.user.id) throw ApiError.forbidden();
+    if (application.status !== 'REVIEW' && application.status !== 'CANCELLED') {
+      throw ApiError.badRequest('Hanya lamaran REVIEW atau CANCELLED yang bisa dihapus');
+    }
+
+    await prisma.application.delete({ where: { id: application.id } });
+    return success(res, { message: 'Lamaran berhasil dihapus' });
   } catch (error) {
     next(error);
   }

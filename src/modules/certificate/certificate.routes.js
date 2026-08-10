@@ -64,4 +64,25 @@ router.get('/:id/download', auth, async (req, res, next) => {
   }
 });
 
+// DELETE /api/certificates/:id — Hapus/cabut sertifikat
+router.delete('/:id', auth, async (req, res, next) => {
+  try {
+    const cert = await prisma.certificate.findUnique({
+      where: { id: req.params.id },
+      include: { application: { include: { internship: { select: { userId: true } } } } },
+    });
+
+    if (!cert) throw ApiError.notFound('Sertifikat tidak ditemukan');
+    // Auth check: only farmer owner or student owner
+    if (req.user.id !== cert.studentId && req.user.id !== cert.application.internship.userId) {
+      throw ApiError.forbidden();
+    }
+
+    await prisma.certificate.delete({ where: { id: cert.id } });
+    return success(res, { message: 'Sertifikat berhasil dihapus' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
