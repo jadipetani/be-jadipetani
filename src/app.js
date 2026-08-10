@@ -10,7 +10,9 @@ const { apiLimiter } = require('./middlewares/rateLimiter');
 const app = express();
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
 app.use(cors({
   origin: env.FRONTEND_URL,
   credentials: true,
