@@ -3,7 +3,7 @@ const app = require('./app');
 const { env } = require('./config/env');
 require('./jobs/scheduledTasks');
 
-const PORT = env.PORT || 5000;
+const PORT = process.env.PORT || env.PORT || 5000;
 const HOST = '0.0.0.0';
 
 app.listen(PORT, HOST, () => {

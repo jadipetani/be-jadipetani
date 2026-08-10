@@ -38,6 +38,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Favicon handler
+app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
 // Scalar API Documentation UI
 const { apiReference } = require('@scalar/express-api-reference');
 const openApiSpec = require('./config/swagger');
