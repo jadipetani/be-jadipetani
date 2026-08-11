@@ -238,7 +238,7 @@ router.patch('/:id/close', auth, authorize('FARMER'), async (req, res, next) => 
   }
 });
 
-// POST /api/jobs/:id/retry-payment — Retry payment untuk status PAYMENT_FAILED / EXPIRED / UNPAID
+// POST /api/jobs/:id/retry-payment — Retry payment untuk status PENDING_PAYMENT / PAYMENT_FAILED / EXPIRED / UNPAID
 router.post('/:id/retry-payment', auth, authorize('FARMER'), async (req, res, next) => {
   try {
     const job = await prisma.job.findFirst({
@@ -247,36 +247,43 @@ router.post('/:id/retry-payment', auth, authorize('FARMER'), async (req, res, ne
     });
 
     if (!job) throw ApiError.notFound('Lowongan tidak ditemukan');
-    if (!['UNPAID', 'PAYMENT_FAILED', 'EXPIRED'].includes(job.status)) {
-      throw ApiError.badRequest('Lowongan ini tidak memerlukan pembayaran ulang');
+    if (job.status === 'PUBLISHED') {
+      throw ApiError.badRequest('Lowongan ini sudah aktif dan dibayar');
     }
 
     const orderId = `JP-JOB-${job.id.slice(0, 8)}-${Date.now()}`;
-    const parameter = {
-      transaction_details: {
-        order_id: orderId,
-        gross_amount: job.placementFee,
-      },
-      item_details: [
-        {
-          id: `placement-fee-${job.id.slice(0, 8)}`,
-          price: job.placementFee,
-          quantity: 1,
-          name: `Placement Fee: ${job.title}`.substring(0, 50),
-        },
-      ],
-      customer_details: {
-        first_name: job.user.fullName,
-        email: job.user.email,
-      },
-    };
+    let snapToken = job.snapToken;
 
-    const transaction = await snap.createTransaction(parameter);
+    try {
+      const parameter = {
+        transaction_details: {
+          order_id: orderId,
+          gross_amount: job.placementFee,
+        },
+        item_details: [
+          {
+            id: `placement-fee-${job.id.slice(0, 8)}`,
+            price: job.placementFee,
+            quantity: 1,
+            name: `Placement Fee: ${job.title}`.substring(0, 50),
+          },
+        ],
+        customer_details: {
+          first_name: job.user.fullName,
+          email: job.user.email,
+        },
+      };
+
+      const transaction = await snap.createTransaction(parameter);
+      snapToken = transaction.token;
+    } catch (midtransErr) {
+      console.warn('[Midtrans Retry Warning]:', midtransErr.message);
+    }
 
     await prisma.job.update({
       where: { id: job.id },
       data: {
-        snapToken: transaction.token,
+        snapToken,
         orderId,
         status: 'PENDING_PAYMENT',
       },
@@ -293,7 +300,7 @@ router.post('/:id/retry-payment', auth, authorize('FARMER'), async (req, res, ne
 
     return success(res, {
       message: 'Token pembayaran baru berhasil dibuat',
-      data: { snapToken: transaction.token, orderId },
+      data: { snapToken, orderId },
     });
   } catch (error) {
     next(error);
