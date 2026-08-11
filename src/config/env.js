@@ -8,6 +8,7 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().trim().min(32, 'JWT_ACCESS_SECRET minimal 32 karakter'),
   JWT_REFRESH_SECRET: z.string().trim().min(32, 'JWT_REFRESH_SECRET minimal 32 karakter'),
   FRONTEND_URL: z.string().trim().min(1).default('http://localhost:5173'),
+  ALLOWED_ORIGINS: z.string().trim().optional().default('https://jadipetani.vercel.app,https://be-jadipetani-production.up.railway.app,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://localhost:5000'),
   SUPABASE_URL: z.string().trim().min(1),
   SUPABASE_SERVICE_KEY: z.string().trim().min(1),
   GEMINI_API_KEY: z.string().trim().min(1),

@@ -9,22 +9,18 @@ const { apiLimiter } = require('./middlewares/rateLimiter');
 
 const app = express();
 
-// Configure allowed CORS origins
-const allowedOrigins = [
-  'https://jadipetani.vercel.app',
-  'https://be-jadipetani-production.up.railway.app',
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://127.0.0.1:5173',
-  'http://localhost:5000',
-];
+// Parse allowed origins dynamically from env.ALLOWED_ORIGINS & env.FRONTEND_URL
+const rawOrigins = (env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
 
-if (env.FRONTEND_URL) {
-  const cleanEnvFrontend = env.FRONTEND_URL.replace(/\/+$/, '');
-  if (!allowedOrigins.includes(cleanEnvFrontend)) {
-    allowedOrigins.push(cleanEnvFrontend);
-  }
+if (env.FRONTEND_URL && !rawOrigins.includes(env.FRONTEND_URL.trim())) {
+  rawOrigins.push(env.FRONTEND_URL.trim());
 }
+
+// Strip trailing slashes
+const allowedOrigins = rawOrigins.map((o) => o.replace(/\/+$/, ''));
 
 const corsOptions = {
   origin: (origin, callback) => {
