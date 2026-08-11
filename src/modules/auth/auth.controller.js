@@ -2,10 +2,12 @@ const authService = require('./auth.service');
 const { success } = require('../../utils/apiResponse');
 const { env } = require('../../config/env');
 
+const isProduction = env.NODE_ENV === 'production';
+
 const REFRESH_TOKEN_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
   path: '/api/auth',
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };

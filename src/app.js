@@ -9,14 +9,49 @@ const { apiLimiter } = require('./middlewares/rateLimiter');
 
 const app = express();
 
+// Configure allowed CORS origins
+const allowedOrigins = [
+  'https://jadipetani.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://localhost:5000',
+];
+
+if (env.FRONTEND_URL) {
+  const cleanEnvFrontend = env.FRONTEND_URL.replace(/\/+$/, '');
+  if (!allowedOrigins.includes(cleanEnvFrontend)) {
+    allowedOrigins.push(cleanEnvFrontend);
+  }
+}
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+
+    const cleanOrigin = origin.replace(/\/+$/, '');
+
+    if (
+      allowedOrigins.includes(cleanOrigin) ||
+      /\.vercel\.app$/.test(cleanOrigin)
+    ) {
+      return callback(null, true);
+    }
+
+    console.warn(`[CORS Blocked] Origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+};
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false,
 }));
-app.use(cors({
-  origin: env.FRONTEND_URL,
-  credentials: true,
-}));
+app.use(cors(corsOptions));
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
