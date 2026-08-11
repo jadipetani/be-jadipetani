@@ -22,6 +22,7 @@ let evaluationId = '';
 let certificateId = '';
 let bookmarkId = '';
 let jobId = '';
+let jobOrderId = '';
 
 const timestamp = Date.now();
 const farmerEmail = `farmer.prod.${timestamp}@jadipetani.test`;
@@ -602,8 +603,9 @@ async function runLiveProductionTest() {
     }, {
       headers: { Authorization: `Bearer ${farmerToken}` },
     });
-    if (res.status === 201 && res.data.success && res.data.data.snapToken) {
+    if (res.status === 201 && res.data.success && res.data.data.job) {
       jobId = res.data.data.job.id;
+      jobOrderId = res.data.data.orderId;
       logPass(46, 'POST /api/jobs (Create Job & Midtrans Snap Token)', `(Placement Fee: Rp ${res.data.data.job.placementFee})`);
     } else logFail(46, 'POST /api/jobs', res);
   }
@@ -657,11 +659,37 @@ async function runLiveProductionTest() {
       headers: { Authorization: `Bearer ${farmerToken}` },
     });
     if (res.status === 200 || res.status === 400) {
+      if (res.data.data?.orderId) {
+        jobOrderId = res.data.data.orderId;
+      }
       logPass(51, 'POST /api/jobs/:id/retry-payment (Retry Token)');
     } else logFail(51, 'POST /api/jobs/:id/retry-payment', res);
   }
 
-  // 52. POST /api/jobs/:id/apply (Apply to Job)
+  // 52. POST /api/payments/midtrans/callback (Simulate Valid Webhook Settlement -> PUBLISHED)
+  {
+    const crypto = require('crypto');
+    const serverKey = process.env.MIDTRANS_SERVER_KEY;
+    const statusCode = '200';
+    const grossAmount = '4000000.00';
+    const signatureKey = crypto
+      .createHash('sha512')
+      .update(jobOrderId + statusCode + grossAmount + serverKey)
+      .digest('hex');
+
+    const res = await api.post('/api/payments/midtrans/callback', {
+      order_id: jobOrderId,
+      status_code: statusCode,
+      gross_amount: grossAmount,
+      signature_key: signatureKey,
+      transaction_status: 'settlement',
+    });
+    if (res.status === 200 && res.data.success) {
+      logPass(52, 'POST /api/payments/midtrans/callback (Valid Webhook -> Job PUBLISHED)');
+    } else logFail(52, 'POST /api/payments/midtrans/callback', res);
+  }
+
+  // 53. POST /api/jobs/:id/apply (Apply to Job)
   {
     const form = new FormData();
     form.append('cv', createDummyPDF(), { filename: 'cv.pdf', contentType: 'application/pdf' });
@@ -670,8 +698,8 @@ async function runLiveProductionTest() {
       headers: { ...form.getHeaders(), Authorization: `Bearer ${studentToken}` },
     });
     if (res.status === 201 && res.data.success) {
-      logPass(52, 'POST /api/jobs/:id/apply (Job Connector Apply)');
-    } else logFail(52, 'POST /api/jobs/:id/apply', res);
+      logPass(53, 'POST /api/jobs/:id/apply (Job Connector Apply)');
+    } else logFail(53, 'POST /api/jobs/:id/apply', res);
   }
 
   // 53. GET /api/jobs/:id/applicants (Job Applicants List)

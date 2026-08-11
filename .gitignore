@@ -5,3 +5,5 @@ dist/
 .DS_Store
 *.md
 !README.md
+!docs/*.md
+!API_FLOW.md
