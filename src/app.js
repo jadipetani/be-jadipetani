@@ -9,6 +9,9 @@ const { apiLimiter } = require('./middlewares/rateLimiter');
 
 const app = express();
 
+// Trust reverse proxy (Railway / Vercel) for express-rate-limit
+app.set('trust proxy', 1);
+
 // Parse allowed origins dynamically from env.ALLOWED_ORIGINS & env.FRONTEND_URL
 const rawOrigins = (env.ALLOWED_ORIGINS || '')
   .split(',')
