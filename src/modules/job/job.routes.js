@@ -44,6 +44,7 @@ router.post('/', auth, authorize('FARMER'), validate(createJobSchema), async (re
     // 2. Create Midtrans transaction
     const orderId = `JP-JOB-${job.id.slice(0, 8)}-${Date.now()}`;
     let snapToken = null;
+    let finalJob = job;
 
     try {
       const parameter = {
@@ -69,7 +70,7 @@ router.post('/', auth, authorize('FARMER'), validate(createJobSchema), async (re
       snapToken = transaction.token;
 
       // Update job with orderId, snapToken & status PENDING_PAYMENT
-      await prisma.job.update({
+      finalJob = await prisma.job.update({
         where: { id: job.id },
         data: {
           snapToken,
@@ -88,14 +89,18 @@ router.post('/', auth, authorize('FARMER'), validate(createJobSchema), async (re
         },
       });
     } catch (midtransErr) {
-      console.error('Midtrans Snap error:', midtransErr);
-      // Job remains in UNPAID status, can retry later
+      console.error('Midtrans Snap error:', midtransErr.message);
+      // Save orderId even if snap fails so retry-payment & payment-status can reference it
+      finalJob = await prisma.job.update({
+        where: { id: job.id },
+        data: { orderId },
+      });
     }
 
     return success(res, {
       statusCode: 201,
       message: 'Lowongan kerja berhasil dibuat. Silakan selesaikan pembayaran.',
-      data: { job, snapToken, orderId },
+      data: { job: finalJob, snapToken, orderId },
     });
   } catch (error) {
     next(error);
