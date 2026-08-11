@@ -183,9 +183,21 @@ router.get('/:id', async (req, res, next) => {
 
     // Only PUBLISHED jobs are public, unless requested by owner
     if (job.status !== 'PUBLISHED') {
-      // If user is authenticated as farmer owner, allow view
       const authHeader = req.headers.authorization;
-      if (!authHeader) throw ApiError.notFound('Lowongan kerja tidak ditemukan');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const jwt = require('../../utils/jwt');
+          const token = authHeader.split(' ')[1];
+          const decoded = jwt.verifyAccessToken(token);
+          if (decoded.id !== job.userId) {
+            throw ApiError.notFound('Lowongan kerja tidak ditemukan');
+          }
+        } catch (e) {
+          throw ApiError.notFound('Lowongan kerja tidak ditemukan');
+        }
+      } else {
+        throw ApiError.notFound('Lowongan kerja tidak ditemukan');
+      }
     }
 
     const { user, ...rest } = job;
