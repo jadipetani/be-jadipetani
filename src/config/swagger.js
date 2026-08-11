@@ -776,12 +776,43 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/internships/{id}/curriculum/generate': {
       post: {
         summary: 'Generate Kurikulum Mingguan Otomatis dengan Google Gemini AI',
-        description: 'Memanggil model AI Google Gemini untuk secara otomatis menyusun struktur kurikulum mingguan, topik pembelajaran, dan indikator checklist aktivitas beserta bobotnya.',
+        description: `
+### ⚠️ CATATAN PENTING UNTUK DEVELOPER FRONTEND (FE):
+Endpoint ini **TIDAK MEMERLUKAN REQUEST BODY** (\`requestBody: {}\` / Kosong).
+
+**Alur Kerja Backend:**
+Frontend **hanya perlu mengirimkan HTTP POST request** ke URL ini dengan Path Parameter \`{id}\` (ID lowongan magang) dan Header \`Authorization: Bearer <accessToken>\`.
+Backend akan **secara otomatis membaca** data komoditas (\`commodity\`), durasi minggu (\`durationWeeks\`), dan deskripsi (\`description\`) dari database lowongan magang tersebut untuk diproses oleh Google Gemini AI.
+
+**Contoh Kode Axios Frontend:**
+\`\`\`javascript
+// FE HANYA PERLU MEMANGGIL SEPERTI INI (BODY KOSONG {}):
+const res = await axios.post(
+  \`https://be-jadipetani-production.up.railway.app/api/internships/\${internshipId}/curriculum/generate\`,
+  {}, // Body kosong / tidak perlu data
+  { headers: { Authorization: \`Bearer \${accessToken}\` } }
+);
+console.log(res.data.data.curriculum); // Hasil kurikulum buatan AI
+\`\`\`
+        `,
         tags: ['AI Curriculum'],
         security: [{ bearerAuth: [] }],
         parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'ID Program Magang (UUID)', example: 'i1234567-89ab-cdef-0123-456789abcdef' },
         ],
+        requestBody: {
+          required: false,
+          description: 'BERKAS BODY TIDAK DIPERLUKAN. Kirimkan JSON kosong `{}` atau tanpa body.',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                description: 'Tidak ada properti yang perlu dikirim dari Frontend.',
+                example: {},
+              },
+            },
+          },
+        },
         responses: {
           200: {
             description: 'Kurikulum AI berhasil digenerate',
@@ -801,13 +832,23 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                           { name: 'Penyemaian Benih di Tray', description: 'Semai 50 benih di tray', weight: 60 },
                         ],
                       },
+                      {
+                        weekNumber: 2,
+                        title: 'Minggu 2: Pindah Tanam & Manajemen Nutrisi AB Mix',
+                        description: 'Transplantasi bibit ke sistem hidroponik & perhitungan PPM.',
+                        activities: [
+                          { name: 'Pindah Tanam Bibit', description: 'Pindahkan bibit daun 4 ke gulud', weight: 50 },
+                          { name: 'Pengukuran EC/PPM Nutrisi', description: 'Atur EC nutrisi di angka 1.8 mS/cm', weight: 50 },
+                        ],
+                      },
                     ],
                   },
                 },
               },
             },
           },
-          503: { description: 'Layanan Google Gemini AI sedang tidak dapat diakses' },
+          403: { description: 'Hanya peran FARMER pemilik lowongan yang dapat memicu AI Generator' },
+          503: { description: 'Layanan Google Gemini AI sedang tidak dapat diakses / rate limited' },
         },
       },
     },
