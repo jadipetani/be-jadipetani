@@ -23,7 +23,17 @@ const createInternshipSchema = z.object({
   status: z.enum(['DRAFT', 'ACTIVE']).optional().default('DRAFT'),
 });
 
-const updateInternshipSchema = createInternshipSchema.partial();
+const updateInternshipSchema = z.object({
+  title: z.string().trim().min(5).max(200).optional(),
+  commodity: z.string().trim().min(2).max(100).optional(),
+  location: z.string().trim().min(5).max(300).optional(),
+  durationMonths: z.coerce.number().int().min(1).max(12).optional(),
+  quota: z.coerce.number().int().min(1).max(100).optional(),
+  deadline: z.string().datetime().optional(),
+  facilities: z.string().trim().max(1000).optional(),
+  description: z.string().trim().min(10).max(5000).optional(),
+  status: z.enum(['DRAFT', 'ACTIVE', 'CLOSED']).optional(),
+});
 
 // === Routes ===
 
