@@ -1,12 +1,12 @@
 const openApiSpec = {
   openapi: '3.0.3',
   info: {
-    title: '🌾 Jadipetani Backend API Reference',
-    version: '1.0.0',
+    title: '🌾 Jadipetani Backend API Reference (Verified Production v1.4)',
+    version: '1.4.0',
     description: `
 # 🚀 Panduan Lengkap Uji Coba API Jadipetani (Untuk Pemula & FE Developer)
 
-Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini memungkinkan Anda untuk langsung menguji (*testing*) seluruh 51+ endpoint REST API langsung dari browser tanpa perlu menginstall Postman.
+Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Seluruh **51+ endpoint REST API** pada dokumentasi ini telah terverifikasi **100% Lulus (58/58 Test Cases)** pada lingkungan produksi Railway **\`https://be-jadipetani-production.up.railway.app\`**.
 
 ---
 
@@ -22,11 +22,19 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
 
 ---
 
+## 🤖 Fitur AI & Integrasi Terverifikasi (v1.4)
+- **AI Curriculum Engine**: Menggunakan Google Gemini AI (\`gemini-3.5-flash\` dengan fallback \`gemini-flash-latest\`) untuk menyusun modul & checklist kegiatan mingguan secara otomatis.
+- **AI Evaluation Summary**: Gemini AI meringkas pencapaian & saran pengembangan peserta magang sebelum kelulusan.
+- **Auto Certificate PDF**: Penerbitan sertifikat digital berbasis PDFKit dengan nomor lisensi resmi & link download signed URL.
+- **Midtrans Payment & Webhook**: Pembuatan Snap Token & verifikasi tanda tangan \`SHA-512\` untuk auto-publish Job Connector.
+
+---
+
 ## 🧭 Alur Skenario Pengujian (End-to-End Testing Flow)
 
 ### 1️⃣ Skenario Magang Pertanian (Internship Flow)
 1. **[Petani] Buat Lowongan Magang**: Call \`POST /api/internships\` (Status awal: \`DRAFT\`).
-2. **[Petani] AI Generator Kurikulum**: Call \`POST /api/internships/{id}/curriculum/generate\` (Google Gemini AI akan otomatis menyusun modul & checklist mingguan).
+2. **[Petani] AI Generator Kurikulum**: Call \`POST /api/internships/{id}/curriculum/generate\` (Google Gemini AI menyusun modul & checklist mingguan. **Catatan FE**: Kirim body kosong \`{}\`).
 3. **[Petani] Publikasikan Magang**: Call \`PATCH /api/internships/{id}/publish\` (Status berubah menjadi \`ACTIVE\`).
 4. **[Pelajar] Cari & Detail Magang**: Call \`GET /api/internships\` dan \`GET /api/internships/{id}\`.
 5. **[Pelajar] Melamar Magang**: Call \`POST /api/internships/{id}/apply\` dengan mengunggah file CV PDF.
@@ -37,12 +45,12 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
 1. **[Pelajar] Pengisian Logbook**: Call \`GET /api/my-internships/{id}/logbook\` → centang aktivitas & isi refleksi via \`PUT /api/my-internships/{id}/logbook/week/{weekNumber}\`.
 2. **[Pelajar] Upload Foto Bukti**: Call \`POST /api/my-internships/{id}/logbook/week/{weekNumber}/evidence\` (Mengunggah foto kegiatan ke Supabase Storage).
 3. **[Petani] Penilaian Mingguan**: Call \`PATCH /api/evaluations/{id}/grade\` untuk memberikan skor & catatan.
-4. **[Petani] Ringkasan AI**: Call \`POST /api/internships/{internshipId}/evaluations/{applicantId}/ai-summary\` (Gemini AI meringkas kekuatan & area pengembangan peserta).
+4. **[Petani] Ringkasan AI**: Call \`POST /api/internships/{internshipId}/evaluations/{applicantId}/ai-summary\` (Gemini AI 3.5 meringkas kekuatan & area pengembangan peserta).
 5. **[Petani] Luluskan & Cetak Sertifikat**: Call \`POST /api/internships/{internshipId}/evaluations/{applicantId}/graduate\` (Terbit sertifikat digital PDF dengan nomor lisensi resmi).
 
 ### 3️⃣ Skenario Job Connector & Pembayaran Midtrans Snap
 1. **[Petani] Buat Lowongan Kerja**: Call \`POST /api/jobs\` (Sistem otomatis menghitung Placement Fee 50% & mengembalikan \`snapToken\` Midtrans).
-2. **[Petani] Testing Webhook Callback**: Call \`POST /api/payments/midtrans/callback\` (Mengirim event \`settlement\` untuk mengaktifkan lowongan dari \`UNPAID\` → \`PUBLISHED\`).
+2. **[Petani] Testing Webhook Callback**: Call \`POST /api/payments/midtrans/callback\` (Mengirim event \`settlement\` dengan signature SHA-512 untuk mengaktifkan lowongan dari \`UNPAID\` → \`PUBLISHED\`).
 3. **[Pelajar] Melamar Pekerjaan**: Call \`POST /api/jobs/{id}/apply\`.
     `,
   },
