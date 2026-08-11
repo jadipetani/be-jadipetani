@@ -5,7 +5,7 @@ const validate = require('../../middlewares/validate');
 const { success } = require('../../utils/apiResponse');
 const prisma = require('../../config/database');
 const ApiError = require('../../utils/apiError');
-const { getGeminiModel } = require('../../config/gemini');
+const { generateAIContent } = require('../../config/gemini');
 const { z } = require('zod');
 
 // === Zod Schema for manual curriculum update ===
@@ -61,9 +61,7 @@ Rules:
 
     let curriculumData;
     try {
-      const model = getGeminiModel();
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
+      const text = await generateAIContent(prompt);
       // Extract JSON from response (handle markdown code blocks)
       const jsonMatch = text.match(/\[[\s\S]*\]/);
       if (!jsonMatch) throw new Error('No JSON found in response');

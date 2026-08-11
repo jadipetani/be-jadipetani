@@ -4,7 +4,7 @@ const authorize = require('../../middlewares/authorize');
 const { success } = require('../../utils/apiResponse');
 const prisma = require('../../config/database');
 const ApiError = require('../../utils/apiError');
-const { getGeminiModel } = require('../../config/gemini');
+const { generateAIContent } = require('../../config/gemini');
 const { sendEmail, graduationEmail } = require('../../utils/emailService');
 
 // GET /api/internships/:internshipId/evaluations/:applicationId
@@ -118,9 +118,7 @@ Format output (JSON):
 HANYA output JSON, tanpa teks tambahan.`;
 
     try {
-      const model = getGeminiModel();
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
+      const text = await generateAIContent(prompt);
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON');
       const summaryData = JSON.parse(jsonMatch[0]);
