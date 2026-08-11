@@ -6,7 +6,7 @@ const openApiSpec = {
     description: `
 # 🚀 Panduan Lengkap Uji Coba API Jadipetani (Untuk Pemula & FE Developer)
 
-Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini memungkinkan Anda untuk langsung menguji (testing) seluruh 51 endpoint REST API langsung dari browser tanpa perlu menginstall Postman.
+Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini memungkinkan Anda untuk langsung menguji (*testing*) seluruh 51+ endpoint REST API langsung dari browser tanpa perlu menginstall Postman.
 
 ---
 
@@ -17,7 +17,7 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
    - **Petani (Farmer)**: \`petani@jadipetani.com\` | Password: \`farmer123\`
    - **Pelajar (Student)**: \`pelajar@jadipetani.com\` | Password: \`student123\`
 4. Setelah respon **200 OK** muncul, salin nilai \`accessToken\` yang dikembalikan.
-5. Gulir ke bagian atas halaman ini, klik tombol **"Authorize"** / **"Bearer Auth"**, lalu tempelkan (paste) \`accessToken\` Anda.
+5. Gulir ke bagian atas halaman ini, klik tombol **"Authorize"** / **"Bearer Auth"**, lalu tempelkan (*paste*) \`accessToken\` Anda.
 6. Sekarang Anda bisa mengakses seluruh endpoint privat yang membutuhkan autentikasi!
 
 ---
@@ -62,7 +62,7 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'Tempelkan Access Token JWT di sini (didapat dari respon login /api/auth/login)',
+        description: 'Masukkan Access Token JWT di sini (didapat dari respon login /api/auth/login)',
       },
     },
   },
@@ -90,17 +90,17 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/health': {
       get: {
         summary: 'Cek Status Server (Health Check)',
-        description: 'Memeriksa apakah server backend, database PostgreSQL Supabase, dan service berjalan dengan normal.',
+        description: 'Memeriksa status kesehatan server backend Express.js, koneksi database PostgreSQL Supabase, dan lingkungan aplikasi.',
         tags: ['Health'],
         responses: {
           200: {
-            description: 'Server aktif dan sehat',
+            description: 'Server berjalan normal dan sehat',
             content: {
               'application/json': {
                 example: {
                   success: true,
                   message: 'Jadipetani Backend API Server is healthy',
-                  timestamp: '2026-08-10T17:30:00.000Z',
+                  timestamp: '2026-08-11T10:00:00.000Z',
                   environment: 'production',
                 },
               },
@@ -115,12 +115,12 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     // ============================================
     '/api/landing/stats': {
       get: {
-        summary: 'Statistik Platform untuk Landing Page (Publik)',
-        description: 'Mengembalikan data agregat total petani terdaftar, pelajar terdaftar, dan program magang aktif untuk ditampilkan di Landing Page utama.',
+        summary: 'Statistik Agregat Platform untuk Landing Page (Publik)',
+        description: 'Mengembalikan data statistik publik real-time seperti total petani terdaftar, pelajar aktif, program magang, dan sertifikat yang telah terbit untuk bagian hero Landing Page.',
         tags: ['Landing'],
         responses: {
           200: {
-            description: 'Data statistik agregat berhasil diambil',
+            description: 'Data statistik platform berhasil diambil',
             content: {
               'application/json': {
                 example: {
@@ -144,8 +144,8 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     // ============================================
     '/api/auth/register': {
       post: {
-        summary: 'Registrasi Pengguna Baru',
-        description: 'Mendaftarkan akun baru dengan pilihan peran **FARMER** (Petani Pemilik Kebun) atau **STUDENT** (Pelajar / Mahasiswa).',
+        summary: 'Registrasi Akun Pengguna Baru',
+        description: 'Mendaftarkan akun baru dengan memilih peran **FARMER** (Petani/Pemilik Lahan/Perusahaan) atau **STUDENT** (Pelajar/Mahasiswa/Pemuda).',
         tags: ['Authentication'],
         requestBody: {
           required: true,
@@ -155,12 +155,12 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                 type: 'object',
                 required: ['fullName', 'email', 'password', 'confirmPassword', 'role', 'agreedToTerms'],
                 properties: {
-                  fullName: { type: 'string', example: 'Ahmad Rizky Pratama' },
-                  email: { type: 'string', example: 'ahmad.rizky@student.ipb.ac.id' },
-                  password: { type: 'string', example: 'password123' },
-                  confirmPassword: { type: 'string', example: 'password123' },
-                  role: { type: 'string', enum: ['FARMER', 'STUDENT'], example: 'STUDENT' },
-                  agreedToTerms: { type: 'boolean', example: true },
+                  fullName: { type: 'string', description: 'Nama lengkap pengguna (2-100 karakter)', example: 'Ahmad Rizky Pratama' },
+                  email: { type: 'string', format: 'email', description: 'Email unik aktif', example: 'ahmad.rizky@student.ipb.ac.id' },
+                  password: { type: 'string', format: 'password', description: 'Password akun (minimal 8 karakter)', example: 'password123' },
+                  confirmPassword: { type: 'string', format: 'password', description: 'Konfirmasi password (harus sama dengan password)', example: 'password123' },
+                  role: { type: 'string', enum: ['FARMER', 'STUDENT'], description: 'Peran akun pengguna', example: 'STUDENT' },
+                  agreedToTerms: { type: 'boolean', description: 'Persetujuan syarat dan ketentuan (harus true)', example: true },
                 },
               },
             },
@@ -168,7 +168,7 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
         },
         responses: {
           201: {
-            description: 'Registrasi berhasil',
+            description: 'Registrasi akun berhasil',
             content: {
               'application/json': {
                 example: {
@@ -180,6 +180,7 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                       fullName: 'Ahmad Rizky Pratama',
                       email: 'ahmad.rizky@student.ipb.ac.id',
                       role: 'STUDENT',
+                      createdAt: '2026-08-11T10:00:00.000Z',
                     },
                     accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
                   },
@@ -188,14 +189,14 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
             },
           },
           409: { description: 'Email sudah terdaftar di sistem' },
-          422: { description: 'Validasi form gagal (password tidak sesuai / kurang panjang)' },
+          422: { description: 'Validasi input gagal (password terlalu pendek / tidak cocok / agreedToTerms false)' },
         },
       },
     },
     '/api/auth/login': {
       post: {
-        summary: 'Login Pengguna',
-        description: 'Autentikasi akun pengguna. Mengembalikan Access Token JWT (berlaku 1 jam) dan mengatur cookie `refreshToken` (httpOnly, 30 hari).',
+        summary: 'Login Pengguna & Terbitkan JWT Access Token',
+        description: 'Autentikasi akun pengguna. Mengembalikan `accessToken` JWT (berlaku 1 jam) dan mengatur cookie `refreshToken` httpOnly (berlaku 30 hari).',
         tags: ['Authentication'],
         requestBody: {
           required: true,
@@ -205,8 +206,8 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                 type: 'object',
                 required: ['email', 'password'],
                 properties: {
-                  email: { type: 'string', example: 'petani@jadipetani.com' },
-                  password: { type: 'string', example: 'farmer123' },
+                  email: { type: 'string', format: 'email', description: 'Email terdaftar', example: 'pelajar@jadipetani.com' },
+                  password: { type: 'string', format: 'password', description: 'Password akun', example: 'student123' },
                 },
               },
             },
@@ -222,10 +223,11 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                   message: 'Login berhasil',
                   data: {
                     user: {
-                      id: 'f8765432-10fe-dcba-9876-543210fedcba',
-                      fullName: 'Pak Budi Santoso',
-                      email: 'petani@jadipetani.com',
-                      role: 'FARMER',
+                      id: 'u1234567-89ab-cdef-0123-456789abcdef',
+                      fullName: 'Siti Rahmawati',
+                      email: 'pelajar@jadipetani.com',
+                      role: 'STUDENT',
+                      avatarUrl: 'https://xxx.supabase.co/storage/v1/object/public/avatars/user-123.jpg',
                     },
                     accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
                   },
@@ -239,64 +241,76 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     },
     '/api/auth/me': {
       get: {
-        summary: 'Informasi User Login Terkini',
-        description: 'Mengambil data profil singkat user yang sedang aktif berdasarkan token JWT.',
+        summary: 'Ambil Profil Pengguna yang Sedang Login',
+        description: 'Mengembalikan informasi detail akun pengguna yang sedang terotentikasi berdasarkan JWT Bearer token.',
         tags: ['Authentication'],
         security: [{ bearerAuth: [] }],
         responses: {
           200: {
-            description: 'Profil berhasil diambil',
+            description: 'Profil pengguna berhasil diambil',
             content: {
               'application/json': {
                 example: {
                   success: true,
                   data: {
-                    id: 'f8765432-10fe-dcba-9876-543210fedcba',
-                    fullName: 'Pak Budi Santoso',
-                    email: 'petani@jadipetani.com',
-                    role: 'FARMER',
-                    institution: 'Kelompok Tani Hydroponic Lembang',
+                    id: 'u1234567-89ab-cdef-0123-456789abcdef',
+                    fullName: 'Siti Rahmawati',
+                    email: 'pelajar@jadipetani.com',
+                    role: 'STUDENT',
+                    phone: '081234567890',
+                    address: 'Bogor, Jawa Barat',
+                    institution: 'Institut Pertanian Bogor',
+                    bio: 'Mahasiswa Agroteknologi minat hidroponik & smart farming.',
+                    avatarUrl: 'https://xxx.supabase.co/storage/v1/object/public/avatars/user-123.jpg',
+                    createdAt: '2026-08-11T10:00:00.000Z',
                   },
                 },
               },
             },
           },
-          401: { description: 'Token tidak ditemukan atau telah kadaluarsa' },
+          401: { description: 'Token tidak ditemukan / expired / invalid' },
         },
       },
     },
     '/api/auth/refresh-token': {
       post: {
-        summary: 'Menerbitkan Access Token Baru (Refresh Token)',
-        description: 'Memperbarui Access Token JWT yang sudah habis masa berlakunya dengan membaca cookie `refreshToken`.',
+        summary: 'Refresh Access Token Menggunakan Cookie Refresh Token',
+        description: 'Menerbitkan `accessToken` baru tanpa perlu login ulang dengan membaca cookie httpOnly `refreshToken`.',
         tags: ['Authentication'],
         responses: {
           200: {
-            description: 'Access token baru berhasil diterbitkan',
+            description: 'Access token berhasil diperbarui',
             content: {
               'application/json': {
                 example: {
                   success: true,
-                  data: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+                  message: 'Token diperbarui',
+                  data: {
+                    accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                  },
                 },
               },
             },
           },
-          401: { description: 'Refresh token invalid atau tidak ditemukan' },
+          401: { description: 'Refresh token tidak valid atau telah kedaluwarsa' },
         },
       },
     },
     '/api/auth/logout': {
       post: {
-        summary: 'Logout Pengguna',
-        description: 'Menghapus cookie `refreshToken` dari browser.',
+        summary: 'Logout Pengguna & Hapus Cookie Refresh Token',
+        description: 'Mengakhiri sesi pengguna dengan menghapus cookie httpOnly `refreshToken` dan membatalkan token.',
         tags: ['Authentication'],
+        security: [{ bearerAuth: [] }],
         responses: {
           200: {
             description: 'Logout berhasil',
             content: {
               'application/json': {
-                example: { success: true, message: 'Logout berhasil' },
+                example: {
+                  success: true,
+                  message: 'Logout berhasil',
+                },
               },
             },
           },
@@ -305,8 +319,8 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     },
     '/api/auth/forgot-password': {
       post: {
-        summary: 'Permintaan Reset Password (Kirim Email)',
-        description: 'Mengirimkan email instruksi berisi token reset password via layanan Resend.',
+        summary: 'Minta Reset Password via Email',
+        description: 'Mengirimkan email berisi tautan token reset password ke alamat email pengguna terdaftar.',
         tags: ['Authentication'],
         requestBody: {
           required: true,
@@ -316,21 +330,31 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                 type: 'object',
                 required: ['email'],
                 properties: {
-                  email: { type: 'string', example: 'user@jadipetani.com' },
+                  email: { type: 'string', format: 'email', description: 'Email terdaftar', example: 'pelajar@jadipetani.com' },
                 },
               },
             },
           },
         },
         responses: {
-          200: { description: 'Email reset password telah dikirim' },
+          200: {
+            description: 'Permintaan reset password berhasil diproses',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Jika email terdaftar, instruksi reset password telah dikirim ke email Anda.',
+                },
+              },
+            },
+          },
         },
       },
     },
     '/api/auth/reset-password': {
       post: {
-        summary: 'Pembaruan Password Baru dengan Token Email',
-        description: 'Menyetel password baru menggunakan token unik yang dikirimkan ke email user.',
+        summary: 'Reset Password Menggunakan Token Reset',
+        description: 'Mengubah password pengguna menggunakan token rahasia yang dikirim melalui email.',
         tags: ['Authentication'],
         requestBody: {
           required: true,
@@ -338,17 +362,29 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['token', 'newPassword'],
+                required: ['token', 'password', 'confirmPassword'],
                 properties: {
-                  token: { type: 'string', example: 'c891234a-5678-90bc-def1-234567890abc' },
-                  newPassword: { type: 'string', example: 'newpassword123' },
+                  token: { type: 'string', description: 'Token reset password dari email', example: 'reset-token-abc123xyz' },
+                  password: { type: 'string', format: 'password', description: 'Password baru (minimal 8 karakter)', example: 'newpassword123' },
+                  confirmPassword: { type: 'string', format: 'password', description: 'Konfirmasi password baru', example: 'newpassword123' },
                 },
               },
             },
           },
         },
         responses: {
-          200: { description: 'Password berhasil diperbarui' },
+          200: {
+            description: 'Password berhasil diubah',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Password berhasil diubah. Silakan login kembali.',
+                },
+              },
+            },
+          },
+          400: { description: 'Token reset password tidak valid atau sudah kadaluwarsa' },
         },
       },
     },
@@ -358,26 +394,27 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     // ============================================
     '/api/users/profile': {
       get: {
-        summary: 'Ambil Detail Profil Lengkap',
+        summary: 'Detail Profil Pengguna Lengkap',
+        description: 'Mengambil informasi lengkap profil pengguna termasuk kontak, institusi, bio, dan alamat.',
         tags: ['User Profile'],
         security: [{ bearerAuth: [] }],
         responses: {
           200: {
-            description: 'Detail profil pengguna',
+            description: 'Data profil berhasil diambil',
             content: {
               'application/json': {
                 example: {
                   success: true,
                   data: {
                     id: 'u1234567-89ab-cdef-0123-456789abcdef',
-                    fullName: 'Ahmad Rizky Pratama',
-                    email: 'ahmad.rizky@student.ipb.ac.id',
+                    fullName: 'Siti Rahmawati',
+                    email: 'pelajar@jadipetani.com',
                     role: 'STUDENT',
                     phone: '081234567890',
-                    address: 'Jl. Raya Dramaga No. 15, Bogor',
-                    institution: 'Institut Pertanian Bogor (IPB)',
-                    bio: 'Mahasiswa Agroteknologi minat pada Smart Farming & Hydroponics.',
-                    avatarUrl: 'https://xxx.supabase.co/storage/v1/object/public/avatars/user-avatar.jpg',
+                    address: 'Bogor Barat, Jawa Barat',
+                    institution: 'Institut Pertanian Bogor',
+                    bio: 'Pengembang pertanian hidroponik muda.',
+                    avatarUrl: 'https://xxx.supabase.co/storage/v1/object/public/avatars/user-123.jpg',
                   },
                 },
               },
@@ -387,37 +424,55 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
       },
       put: {
         summary: 'Perbarui Data Profil Pengguna',
+        description: 'Mengubah informasi profil pengguna seperti nama lengkap, nomor telepon, alamat, nama institusi/kampus, dan biodata.',
         tags: ['User Profile'],
         security: [{ bearerAuth: [] }],
         requestBody: {
+          required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
                 properties: {
-                  phone: { type: 'string', example: '081299887766' },
-                  address: { type: 'string', example: 'Lembang, Bandung Barat' },
-                  institution: { type: 'string', example: 'Kelompok Tani Subur Makmur' },
-                  bio: { type: 'string', example: 'Praktisi budidaya hidroponik buah & sayur komersial.' },
+                  fullName: { type: 'string', example: 'Siti Rahmawati, S.P.' },
+                  phone: { type: 'string', example: '081234567890' },
+                  address: { type: 'string', example: 'Jalan Raya Dramaga No. 15, Bogor' },
+                  institution: { type: 'string', example: 'Institut Pertanian Bogor (IPB University)' },
+                  bio: { type: 'string', example: 'Fokus pada riset nutrisi tanaman Melon & Cabai hidroponik.' },
                 },
               },
             },
           },
         },
         responses: {
-          200: { description: 'Profil berhasil diperbarui' },
+          200: {
+            description: 'Profil berhasil diperbarui',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Profil berhasil diperbarui',
+                  data: {
+                    fullName: 'Siti Rahmawati, S.P.',
+                    phone: '081234567890',
+                    institution: 'Institut Pertanian Bogor (IPB University)',
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
     '/api/users/profile/completion': {
       get: {
-        summary: 'Hitung Persentase Kelengkapan Profil (Progress Profil)',
-        description: 'Menghitung persentase isi data profil (0-100%) untuk menampilkan bar progress dan CTA "Lengkapi Profil" di Dashboard Pelajar.',
+        summary: 'Hitung Persentase Kelengkapan Profil Pengguna (0-100%)',
+        description: 'Menghitung skor kelengkapan data profil untuk membantu indikator UI frontend (progress bar kelengkapan profil).',
         tags: ['User Profile'],
         security: [{ bearerAuth: [] }],
         responses: {
           200: {
-            description: 'Perhitungan persentase kelengkapan profil',
+            description: 'Skor persentase kelengkapan profil berhasil dihitung',
             content: {
               'application/json': {
                 example: {
@@ -437,30 +492,46 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     },
     '/api/users/profile/avatar': {
       post: {
-        summary: 'Upload Foto Profil (Supabase Storage)',
-        description: 'Mengunggah file foto profil (JPG/PNG/WebP, max 5MB) ke bucket Supabase `avatars`.',
+        summary: 'Upload Foto Profil / Avatar (Supabase Storage)',
+        description: 'Mengunggah foto profil pengguna ke Supabase Storage bucket `avatars` (Format: JPG/PNG/WebP, maksimal 5MB).',
         tags: ['User Profile'],
         security: [{ bearerAuth: [] }],
         requestBody: {
+          required: true,
           content: {
             'multipart/form-data': {
               schema: {
                 type: 'object',
+                required: ['avatar'],
                 properties: {
-                  avatar: { type: 'string', format: 'binary', description: 'File gambar (JPG, PNG, WebP)' },
+                  avatar: { type: 'string', format: 'binary', description: 'File gambar avatar (max 5MB)' },
                 },
               },
             },
           },
         },
         responses: {
-          200: { description: 'Foto profil berhasil diupload & disimpan' },
+          200: {
+            description: 'Foto profil berhasil diperbarui',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Foto profil berhasil diperbarui',
+                  data: {
+                    avatarUrl: 'https://xxx.supabase.co/storage/v1/object/public/avatars/user-123.jpg',
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
     '/api/users/change-password': {
       put: {
         summary: 'Ganti Password Pengguna',
+        description: 'Mengubah password pengguna terotentikasi dengan memverifikasi password lama terlebih dahulu.',
         tags: ['User Profile'],
         security: [{ bearerAuth: [] }],
         requestBody: {
@@ -471,28 +542,49 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                 type: 'object',
                 required: ['currentPassword', 'newPassword', 'confirmNewPassword'],
                 properties: {
-                  currentPassword: { type: 'string', example: 'password123' },
-                  newPassword: { type: 'string', example: 'newpassword123' },
-                  confirmNewPassword: { type: 'string', example: 'newpassword123' },
+                  currentPassword: { type: 'string', format: 'password', example: 'student123' },
+                  newPassword: { type: 'string', format: 'password', example: 'newstudent123' },
+                  confirmNewPassword: { type: 'string', format: 'password', example: 'newstudent123' },
                 },
               },
             },
           },
         },
         responses: {
-          200: { description: 'Password berhasil diubah' },
-          401: { description: 'Password lama salah' },
-          422: { description: 'Konfirmasi password tidak cocok / validasi gagal' },
+          200: {
+            description: 'Password berhasil diubah',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Password berhasil diubah',
+                },
+              },
+            },
+          },
+          401: { description: 'Password lama yang dimasukkan salah' },
+          422: { description: 'Konfirmasi password baru tidak cocok' },
         },
       },
     },
     '/api/users/me': {
       delete: {
-        summary: 'Hapus Akun Pengguna Permanen',
+        summary: 'Hapus Akun Pengguna Permanen (Cascading Delete)',
+        description: 'Menghapus akun pengguna beserta seluruh data relasi (lowongan, lamaran, logbook, sertifikat) secara permanen dari database.',
         tags: ['User Profile'],
         security: [{ bearerAuth: [] }],
         responses: {
-          200: { description: 'Akun berhasil dihapus' },
+          200: {
+            description: 'Akun berhasil dihapus permanen',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Akun berhasil dihapus',
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -503,18 +595,18 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/internships': {
       get: {
         summary: 'Daftar Lowongan Magang Publik (Search & Filter)',
-        description: 'Menampilkan seluruh program magang berstatus `ACTIVE` yang terbuka untuk dilamar oleh pelajar.',
+        description: 'Menampilkan daftar lowongan magang pertanian berstatus `ACTIVE` yang dapat dilamar oleh publik/pelajar.',
         tags: ['Internships'],
         parameters: [
-          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Cari judul / komoditas' },
-          { name: 'location', in: 'query', schema: { type: 'string' }, description: 'Filter lokasi' },
-          { name: 'commodity', in: 'query', schema: { type: 'string' }, description: 'Filter jenis komoditas' },
-          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Pencarian nama judul / komoditas', example: 'Melon' },
+          { name: 'location', in: 'query', schema: { type: 'string' }, description: 'Filter wilayah lokasi kebun', example: 'Lembang' },
+          { name: 'commodity', in: 'query', schema: { type: 'string' }, description: 'Filter jenis komoditas pertanian', example: 'Melon' },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 }, description: 'Nomor halaman pagination', example: 1 },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 }, description: 'Jumlah item per halaman', example: 10 },
         ],
         responses: {
           200: {
-            description: 'Daftar lowongan magang publik',
+            description: 'Daftar magang publik berhasil diambil',
             content: {
               'application/json': {
                 example: {
@@ -541,8 +633,8 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
         },
       },
       post: {
-        summary: 'Buat Program Magang Baru (Petani)',
-        description: 'Membuat draft lowongan magang baru. Awalnya berstatus `DRAFT` sebelum dipublikasikan.',
+        summary: 'Buat Lowongan Magang Baru (Petani)',
+        description: 'Petani mendaftarkan program magang baru. Status awal program adalah `DRAFT` sebelum dilengkapi kurikulum dan dipublikasikan.',
         tags: ['Internships'],
         security: [{ bearerAuth: [] }],
         requestBody: {
@@ -553,81 +645,128 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                 type: 'object',
                 required: ['title', 'commodity', 'location', 'durationMonths', 'quota', 'deadline', 'description'],
                 properties: {
-                  title: { type: 'string', example: 'Magang Budidaya Melon Hidroponik' },
-                  commodity: { type: 'string', example: 'Melon Hibrida Super' },
-                  location: { type: 'string', example: 'Lembang, Bandung Barat' },
-                  durationMonths: { type: 'integer', example: 1 },
-                  quota: { type: 'integer', example: 4 },
-                  deadline: { type: 'string', example: '2026-09-01T00:00:00.000Z' },
-                  facilities: { type: 'string', example: 'Akomodasi mes, makan siang gratis, peralatan praktek' },
-                  description: { type: 'string', example: 'Program magang 1 bulan mempelajari nutrisi AB Mix & drip fertigation.' },
+                  title: { type: 'string', description: 'Judul program magang', example: 'Magang Budidaya Melon Hidroponik' },
+                  commodity: { type: 'string', description: 'Komoditas utama', example: 'Melon Hibrida Super' },
+                  location: { type: 'string', description: 'Lokasi kebun/perusahaan', example: 'Lembang, Bandung Barat' },
+                  durationMonths: { type: 'integer', description: 'Durasi program (bulan)', example: 1 },
+                  quota: { type: 'integer', description: 'Kuota peserta magang', example: 4 },
+                  deadline: { type: 'string', format: 'date-time', description: 'Batas akhir pendaftaran', example: '2026-09-01T00:00:00.000Z' },
+                  facilities: { type: 'string', description: 'Fasilitas yang disediakan', example: 'Akomodasi mes, makan siang gratis, alat kerja' },
+                  description: { type: 'string', description: 'Deskripsi detail program', example: 'Program 1 bulan riset formulasi AB Mix & drip fertigation.' },
                 },
               },
             },
           },
         },
         responses: {
-          201: { description: 'Program magang baru berhasil dibuat (Status DRAFT)' },
+          201: {
+            description: 'Lowongan magang berhasil dibuat (Status DRAFT)',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Lowongan magang berhasil dibuat',
+                  data: {
+                    id: 'i1234567-89ab-cdef-0123-456789abcdef',
+                    title: 'Magang Budidaya Melon Hidroponik',
+                    status: 'DRAFT',
+                  },
+                },
+              },
+            },
+          },
+          403: { description: 'Hanya peran FARMER yang dapat membuat program magang' },
         },
       },
     },
     '/api/internships/my': {
       get: {
-        summary: 'Daftar Lowongan Magang Milik Petani Login',
-        description: 'Menampilkan seluruh lowongan magang milik petani (semua status: DRAFT, ACTIVE, CLOSED).',
+        summary: 'Daftar Lowongan Magang Milik Petani yang Login',
+        description: 'Menampilkan seluruh daftar magang yang pernah dibuat petani (semua status: DRAFT, ACTIVE, CLOSED).',
         tags: ['Internships'],
         security: [{ bearerAuth: [] }],
-        responses: { 200: { description: 'Daftar magang milik petani' } },
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['DRAFT', 'ACTIVE', 'CLOSED'] } },
+        ],
+        responses: {
+          200: { description: 'Daftar magang milik petani berhasil diambil' },
+        },
       },
     },
     '/api/internships/{id}': {
       get: {
-        summary: 'Detail Program Magang',
+        summary: 'Detail Lowongan Magang & Preview Kurikulum',
+        description: 'Mengambil informasi rinci suatu program magang pertanian beserta pratinjau modul kurikulumnya.',
         tags: ['Internships'],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Detail lengkap program magang' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'ID Program Magang (UUID)', example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Detail program magang berhasil ditemukan' },
+          404: { description: 'Program magang tidak ditemukan' },
+        },
       },
       put: {
-        summary: 'Edit Data Program Magang',
+        summary: 'Edit Lowongan Magang (Petani Pemilik)',
+        description: 'Memperbarui data lowongan magang. Hanya dapat dilakukan oleh petani pemilik program.',
         tags: ['Internships'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
         requestBody: {
+          required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
                 properties: {
-                  title: { type: 'string', example: 'Magang Budidaya Melon Organik' },
+                  title: { type: 'string', example: 'Magang Budidaya Melon Organik Super' },
                   commodity: { type: 'string', example: 'Melon Organik' },
                   location: { type: 'string', example: 'Lembang Barat, Bandung' },
                   durationMonths: { type: 'integer', example: 1 },
                   quota: { type: 'integer', example: 5 },
                   status: { type: 'string', enum: ['DRAFT', 'ACTIVE', 'CLOSED'], example: 'ACTIVE' },
-                  facilities: { type: 'string', example: 'Mes, makan siang, sertifikat' },
-                  description: { type: 'string', example: 'Program magang 1 bulan budidaya melon.' },
+                  facilities: { type: 'string', example: 'Akomodasi mes, makan siang, sertifikat digital' },
+                  description: { type: 'string', example: 'Program magang 1 bulan praktek lapangan.' },
                 },
               },
             },
           },
         },
-        responses: { 200: { description: 'Program magang diperbarui' } },
+        responses: {
+          200: { description: 'Lowongan magang berhasil diperbarui' },
+          403: { description: 'Bukan pemilik lowongan' },
+        },
       },
       delete: {
-        summary: 'Hapus Program Magang',
+        summary: 'Hapus Lowongan Magang',
+        description: 'Menghapus program magang (Soft Delete). Mengirim email notifikasi pembatalan otomatis jika ada pelamar.',
         tags: ['Internships'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Program magang dihapus' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Lowongan magang berhasil dihapus' },
+        },
       },
     },
     '/api/internships/{id}/publish': {
       patch: {
         summary: 'Publikasikan Lowongan Magang (DRAFT -> ACTIVE)',
+        description: 'Mengubah status magang dari `DRAFT` menjadi `ACTIVE` agar dapat dilamar pelajar. Syarat: Kurikulum wajib sudah dibuat.',
         tags: ['Internships'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Lowongan magang dipublikasikan' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Lowongan magang berhasil dipublikasikan' },
+          400: { description: 'Kurikulum belum disusun. Buat kurikulum terlebih dahulu.' },
+        },
       },
     },
 
@@ -636,14 +775,16 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     // ============================================
     '/api/internships/{id}/curriculum/generate': {
       post: {
-        summary: 'Generate Kurikulum Mingguan Otomatis Menggunakan Google Gemini AI',
-        description: 'Memanggil API Google Gemini AI untuk menyusun struktur modul belajar, bab, dan checklist aktivitas mingguan berdasarkan komoditas & durasi magang.',
+        summary: 'Generate Kurikulum Mingguan Otomatis dengan Google Gemini AI',
+        description: 'Memanggil model AI Google Gemini untuk secara otomatis menyusun struktur kurikulum mingguan, topik pembelajaran, dan indikator checklist aktivitas beserta bobotnya.',
         tags: ['AI Curriculum'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
         responses: {
           200: {
-            description: 'Kurikulum AI berhasil disusun',
+            description: 'Kurikulum AI berhasil digenerate',
             content: {
               'application/json': {
                 example: {
@@ -656,8 +797,8 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                         title: 'Minggu 1: Persiapan Media Tanam & Persemaian Benih Melon',
                         description: 'Memahami formulasi media cocopeat & teknik semai.',
                         activities: [
-                          { name: 'Sterilisasi Media Tanam', description: 'Gunakan larutan sterilisasi', weight: 40 },
-                          { name: 'Penyemaian Benih di Tray', description: 'Semai 50 benih melon', weight: 60 },
+                          { name: 'Sterilisasi Media Tanam', description: 'Sterilisasi dengan larutan khusus', weight: 40 },
+                          { name: 'Penyemaian Benih di Tray', description: 'Semai 50 benih di tray', weight: 60 },
                         ],
                       },
                     ],
@@ -666,21 +807,28 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
               },
             },
           },
+          503: { description: 'Layanan Google Gemini AI sedang tidak dapat diakses' },
         },
       },
     },
     '/api/internships/{id}/curriculum': {
       get: {
-        summary: 'Preview Kurikulum Program Magang',
+        summary: 'Get Preview Kurikulum Program Magang',
+        description: 'Melihat rincian struktur kurikulum mingguan suatu program magang.',
         tags: ['AI Curriculum'],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Struktur kurikulum mingguan' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: { description: 'Preview kurikulum berhasil diambil' },
       },
       put: {
         summary: 'Simpan / Edit Manual Kurikulum Mingguan',
+        description: 'Membuat atau mengedit modul kurikulum mingguan secara manual. Total bobot (*weight*) aktivitas per minggu wajib berjumlah 100%.',
         tags: ['AI Curriculum'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
         requestBody: {
           required: true,
           content: {
@@ -696,7 +844,7 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                       required: ['weekNumber', 'title', 'description', 'activities'],
                       properties: {
                         weekNumber: { type: 'integer', example: 1 },
-                        title: { type: 'string', example: 'Minggu 1: Olah Tanah' },
+                        title: { type: 'string', example: 'Minggu 1: Persiapan Lahan' },
                         description: { type: 'string', example: 'Persiapan bedengan lahan' },
                         activities: {
                           type: 'array',
@@ -704,8 +852,8 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                             type: 'object',
                             required: ['name', 'description', 'weight'],
                             properties: {
-                              name: { type: 'string', example: 'Penyangkulan' },
-                              description: { type: 'string', example: 'Gemburkan tanah' },
+                              name: { type: 'string', example: 'Penyangkulan Bedengan' },
+                              description: { type: 'string', example: 'Gemburkan tanah hingga kedalaman 30cm' },
                               weight: { type: 'integer', example: 50 },
                             },
                           },
@@ -718,14 +866,23 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
             },
           },
         },
-        responses: { 200: { description: 'Kurikulum berhasil disimpan' } },
+        responses: {
+          200: { description: 'Kurikulum mingguan berhasil disimpan' },
+          422: { description: 'Total bobot aktivitas per minggu tidak sama dengan 100' },
+        },
       },
       delete: {
-        summary: 'Reset / Hapus Kurikulum',
+        summary: 'Reset / Hapus Kurikulum Program Magang',
+        description: 'Menghapus kurikulum yang ada (hanya untuk magang berstatus DRAFT).',
         tags: ['AI Curriculum'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Kurikulum berhasil dihapus' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Kurikulum berhasil dihapus' },
+          400: { description: 'Kurikulum magang ACTIVE tidak dapat dihapus' },
+        },
       },
     },
 
@@ -735,21 +892,23 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/internships/{id}/apply': {
       post: {
         summary: 'Kirim Lamaran Magang (Pelajar)',
-        description: 'Pelajar mengirimkan lamaran dengan mengunggah file CV (Wajib PDF) & Portofolio (Opsional PDF) yang akan disimpan aman di Supabase Storage.',
+        description: 'Pelajar mengajukan lamaran magang dengan mengunggah berkas CV (PDF wajib) & Portofolio (PDF opsional) yang disimpan di Supabase Storage.',
         tags: ['Applications'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+        ],
         requestBody: {
           required: true,
           content: {
             'multipart/form-data': {
               schema: {
                 type: 'object',
-                required: ['cv'],
+                required: ['cv', 'motivation'],
                 properties: {
-                  cv: { type: 'string', format: 'binary', description: 'File CV format PDF (max 5MB)' },
-                  portfolio: { type: 'string', format: 'binary', description: 'File Portfolio format PDF (max 5MB)' },
-                  motivation: { type: 'string', example: 'Saya sangat tertarik belajar teknologi Drip Fertigation langsung di kebun.' },
+                  cv: { type: 'string', format: 'binary', description: 'File CV PDF (Maksimal 5MB)' },
+                  portfolio: { type: 'string', format: 'binary', description: 'File Portofolio PDF (Maksimal 5MB, opsional)' },
+                  motivation: { type: 'string', description: 'Surat motivasi melamar magang', example: 'Saya sangat berminat mempraktikkan riset hidroponik secara langsung.' },
                 },
               },
             },
@@ -757,95 +916,141 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
         },
         responses: {
           201: { description: 'Lamaran magang berhasil dikirim' },
-          400: { description: 'Kuota penuh / Anda sudah melamar sebelumnya / batas 5 lamaran aktif tercapai' },
+          400: { description: 'Anda sudah pernah melamar / Kuota penuh / Batas 5 lamaran aktif tercapai' },
         },
       },
     },
     '/api/jobs/{id}/apply': {
       post: {
         summary: 'Kirim Lamaran Pekerjaan Job Connector (Pelajar)',
+        description: 'Pelajar mengajukan lamaran pekerjaan ke lowongan profesional Job Connector.',
         tags: ['Applications'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'j1234567-89ab-cdef-0123-456789abcdef' },
+        ],
         requestBody: {
           required: true,
           content: {
             'multipart/form-data': {
               schema: {
                 type: 'object',
-                required: ['cv'],
+                required: ['cv', 'motivation'],
                 properties: {
-                  cv: { type: 'string', format: 'binary', description: 'File CV PDF (max 5MB)' },
-                  portfolio: { type: 'string', format: 'binary', description: 'File Portfolio PDF (max 5MB)' },
-                  motivation: { type: 'string', example: 'Pengalaman 2 tahun mengelola kebun hortikultura.' },
+                  cv: { type: 'string', format: 'binary', description: 'File CV PDF (Maksimal 5MB)' },
+                  portfolio: { type: 'string', format: 'binary', description: 'File Portofolio PDF (Maksimal 5MB)' },
+                  motivation: { type: 'string', example: 'Pengalaman 2 tahun mengelola perkebunan hortikultura.' },
                 },
               },
             },
           },
         },
-        responses: { 201: { description: 'Lamaran pekerjaan berhasil dikirim' } },
+        responses: {
+          201: { description: 'Lamaran pekerjaan berhasil dikirim' },
+        },
       },
     },
     '/api/applications/my': {
       get: {
-        summary: 'List Seluruh Lamaran Milik Pelajar Login',
-        description: 'Menampilkan riwayat lamaran magang & pekerjaan milik pelajar beserta statusnya (REVIEW, ACCEPTED, REJECTED, CANCELLED).',
+        summary: 'List Riwayat Lamaran Milik Pelajar Login',
+        description: 'Menampilkan seluruh riwayat lamaran magang & pekerjaan yang dikirimkan pelajar beserta statusnya (`REVIEW`, `ACCEPTED`, `REJECTED`, `CANCELLED`).',
         tags: ['Applications'],
         security: [{ bearerAuth: [] }],
-        responses: { 200: { description: 'Daftar lamaran milik pelajar' } },
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'type', in: 'query', schema: { type: 'string', enum: ['INTERNSHIP', 'JOB'] } },
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['REVIEW', 'ACCEPTED', 'REJECTED', 'CANCELLED'] } },
+        ],
+        responses: {
+          200: { description: 'Daftar lamaran pelajar berhasil diambil' },
+        },
       },
     },
     '/api/applications/{id}': {
       get: {
-        summary: 'Detail Lamaran (Termasuk Temporary Signed URL File CV & Portfolio)',
+        summary: 'Detail Lamaran & Signed URL Berkas PDF',
+        description: 'Melihat detail berkas lamaran beserta Signed URL sementara (berlaku 1 jam) untuk mengunduh CV & Portofolio dari Supabase Storage.',
         tags: ['Applications'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Detail lamaran & signed link CV' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Detail lamaran & signed link PDF berhasil didapat' },
+        },
       },
       delete: {
-        summary: 'Hapus / Batal Lamaran (Status REVIEW)',
+        summary: 'Batalkan / Hapus Lamaran (Pelajar)',
+        description: 'Pelajar membatalkan lamaran yang dikirimnya (hanya untuk lamaran berstatus REVIEW).',
         tags: ['Applications'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Lamaran berhasil dibatalkan/dihapus' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Lamaran berhasil dibatalkan' },
+        },
       },
     },
     '/api/internships/{id}/applicants': {
       get: {
-        summary: 'Daftar Pelamar Program Magang (Petani)',
+        summary: 'Daftar Pelamar Program Magang (Petani Pemilik)',
+        description: 'Petani melihat daftar pendaftar yang melamar pada program magang pertanian miliknya.',
         tags: ['Applicant Management'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Daftar pelamar magang' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Cari nama pendaftar' },
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['REVIEW', 'ACCEPTED', 'REJECTED'] } },
+          { name: 'institution', in: 'query', schema: { type: 'string' }, description: 'Filter asal instansi/kampus' },
+        ],
+        responses: {
+          200: { description: 'Daftar pelamar magang berhasil diambil' },
+        },
       },
     },
     '/api/jobs/{id}/applicants': {
       get: {
-        summary: 'Daftar Pelamar Pekerjaan Job Connector (Petani)',
+        summary: 'Daftar Pelamar Pekerjaan Job Connector (Petani Pemilik)',
+        description: 'Petani melihat daftar kandidat pekerja yang melamar lowongan profesional.',
         tags: ['Applicant Management'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Daftar pelamar pekerjaan' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'j1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Daftar pelamar pekerjaan berhasil diambil' },
+        },
       },
     },
     '/api/applications/{id}/accept': {
       patch: {
         summary: 'Terima Pelamar Magang (Sistem Memeriksa Kuota & Membuat AI Logbook)',
-        description: 'Menerima pendaftar magang. Sistem akan secara otomatis menggenerate **AI Logbook Mingguan** & tabel **Evaluasi** peserta dari kurikulum magang.',
+        description: 'Petani menerima pelamar. Sistem memverifikasi sisa kuota magang, mengubah status menjadi `ACCEPTED`, dan secara otomatis menggenerate **AI Logbook Mingguan** & tabel **Evaluasi** peserta.',
         tags: ['Applicant Management'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Pelamar diterima & logbook peserta berhasil di-generate' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Pelamar berhasil diterima & logbook otomatis terbuat' },
+          400: { description: 'Kuota magang sudah penuh' },
+        },
       },
     },
     '/api/applications/{id}/reject': {
       patch: {
         summary: 'Tolak Pelamar Magang',
+        description: 'Petani menolak lamaran peserta. Sistem akan mengirim email pemberitahuan ke peserta.',
         tags: ['Applicant Management'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Pelamar ditolak & email pemberitahuan dikirim' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Pelamar berhasil ditolak' },
+        },
       },
     },
 
@@ -855,29 +1060,37 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/my-internships': {
       get: {
         summary: 'Daftar Program Magang yang Sedang / Pernah Diikuti Pelajar',
+        description: 'Menampilkan seluruh daftar magang berstatus ACCEPTED yang diikuti oleh pelajar terotentikasi.',
         tags: ['My Internships & AI Logbook'],
         security: [{ bearerAuth: [] }],
-        responses: { 200: { description: 'Daftar magang peserta' } },
+        responses: {
+          200: { description: 'Daftar program magang aktif peserta' },
+        },
       },
     },
     '/api/my-internships/{id}/logbook': {
       get: {
-        summary: 'Data Logbook Mingguan & Persentase Total Progress',
+        summary: 'Get Data Logbook Mingguan & Persentase Total Progress Magang',
+        description: 'Mengambil seluruh ringkasan minggu logbook peserta, persentase penyelesaian keseluruhan (0-100%), dan status verifikasi.',
         tags: ['My Internships & AI Logbook'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Logbook mingguan & persentase progress' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Application ID', example: 'a1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Data logbook peserta berhasil diambil' },
+        },
       },
     },
     '/api/my-internships/{id}/logbook/week/{weekNumber}': {
       put: {
-        summary: 'Update Checklist & Refleksi Mingguan (Peserta Magang)',
-        description: 'Peserta menyentang aktivitas yang selesai dikerjakan & mengisi jurnal refleksi mingguan.',
+        summary: 'Update Checklist Aktivitas & Refleksi Jurnal Mingguan (Peserta)',
+        description: 'Peserta memperbarui checklist tugas mingguan dan menuliskan catatan refleksi jurnal kegiatan.',
         tags: ['My Internships & AI Logbook'],
         security: [{ bearerAuth: [] }],
         parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
-          { name: 'weekNumber', in: 'path', required: true, schema: { type: 'integer' } },
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
+          { name: 'weekNumber', in: 'path', required: true, schema: { type: 'integer' }, example: 1 },
         ],
         requestBody: {
           required: true,
@@ -886,13 +1099,15 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
               schema: {
                 type: 'object',
                 properties: {
-                  reflection: { type: 'string', example: 'Minggu ini berhasil menyemai 50 benih melon dengan persentase tumbuh 95%.' },
+                  reflection: { type: 'string', description: 'Jurnal refleksi pengalaman minggu ini', example: 'Minggu ini berhasil menyemai 50 benih melon dengan tingkat daya kecambah 95%.' },
                   activities: {
                     type: 'array',
+                    description: 'Daftar status centang aktivitas',
                     items: {
                       type: 'object',
+                      required: ['id', 'isCompleted'],
                       properties: {
-                        id: { type: 'string' },
+                        id: { type: 'string', example: 'act-12345' },
                         isCompleted: { type: 'boolean', example: true },
                       },
                     },
@@ -902,18 +1117,20 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
             },
           },
         },
-        responses: { 200: { description: 'Progress logbook minggu ini disimpan' } },
+        responses: {
+          200: { description: 'Checklist & refleksi logbook minggu ini berhasil disimpan' },
+        },
       },
     },
     '/api/my-internships/{id}/logbook/week/{weekNumber}/evidence': {
       post: {
-        summary: 'Upload Foto Bukti Kegiatan Minggu Ini (Supabase Storage)',
+        summary: 'Upload Foto Bukti Dokumen Kegiatan Minggu Ini (Supabase Storage)',
         description: 'Mengunggah foto-foto dokumentasi bukti kegiatan praktek mingguan ke bucket Supabase `logbook-docs`.',
         tags: ['My Internships & AI Logbook'],
         security: [{ bearerAuth: [] }],
         parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
-          { name: 'weekNumber', in: 'path', required: true, schema: { type: 'integer' } },
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
+          { name: 'weekNumber', in: 'path', required: true, schema: { type: 'integer' }, example: 1 },
         ],
         requestBody: {
           required: true,
@@ -921,14 +1138,21 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
             'multipart/form-data': {
               schema: {
                 type: 'object',
+                required: ['documentation'],
                 properties: {
-                  documentation: { type: 'array', items: { type: 'string', format: 'binary' }, description: 'File gambar (JPG, PNG, max 10 file)' },
+                  documentation: {
+                    type: 'array',
+                    items: { type: 'string', format: 'binary' },
+                    description: 'File gambar bukti kegiatan (JPG/PNG, maksimal 10 file sekaligus)',
+                  },
                 },
               },
             },
           },
         },
-        responses: { 201: { description: 'Foto bukti dokumentasi berhasil diunggah' } },
+        responses: {
+          201: { description: 'Foto bukti dokumentasi kegiatan berhasil diunggah' },
+        },
       },
     },
 
@@ -938,21 +1162,27 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/internships/{internshipId}/evaluations/{applicantId}': {
       get: {
         summary: 'Get Data Lembar Evaluasi Peserta (Petani)',
+        description: 'Petani melihat lembar penilaian mingguan peserta magang beserta skor checklist dan dokumentasinya.',
         tags: ['Evaluation & Certificate'],
         security: [{ bearerAuth: [] }],
         parameters: [
-          { name: 'internshipId', in: 'path', required: true, schema: { type: 'string' } },
-          { name: 'applicantId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'internshipId', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+          { name: 'applicantId', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
         ],
-        responses: { 200: { description: 'Data evaluasi peserta' } },
+        responses: {
+          200: { description: 'Data evaluasi peserta magang berhasil diambil' },
+        },
       },
     },
     '/api/evaluations/{id}/grade': {
       patch: {
-        summary: 'Berikan Skor Penilaian & Catatan Petani',
+        summary: 'Berikan Skor Penilaian (1-100) & Catatan Petani Per Minggu',
+        description: 'Petani memberikan nilai kuantitatif (skala 1-100) dan catatan bimbingan untuk evaluasi minggu tertentu.',
         tags: ['Evaluation & Certificate'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Evaluation ID per minggu', example: 'eval-12345' },
+        ],
         requestBody: {
           required: true,
           content: {
@@ -961,40 +1191,78 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                 type: 'object',
                 required: ['score'],
                 properties: {
-                  score: { type: 'integer', example: 90, description: 'Skor 0-100' },
-                  notes: { type: 'string', example: 'Sangat teliti dalam sterilisasi media tanam.' },
+                  score: { type: 'integer', description: 'Nilai kuantitatif (1-100)', example: 90 },
+                  notes: { type: 'string', description: 'Catatan pembimbing/petani', example: 'Sangat teliti dalam racikan larutan AB Mix.' },
                 },
               },
             },
           },
         },
-        responses: { 200: { description: 'Nilai minggu ini berhasil disimpan' } },
+        responses: {
+          200: { description: 'Penilaian minggu ini berhasil disimpan' },
+        },
       },
     },
     '/api/internships/{internshipId}/evaluations/{applicantId}/ai-summary': {
       post: {
-        summary: 'Generate Ringkasan Evaluasi AI Gemini',
-        description: 'Google Gemini AI menganalisis seluruh data checklist & refleksi logbook peserta untuk menghasilkan **Kompetensi Utama** & **Rekomendasi Area Pengembangan**.',
+        summary: 'Generate Ringkasan Evaluasi AI Gemini (Kompetensi Utama & Area Pengembangan)',
+        description: 'Google Gemini AI menganalisis seluruh checklist, jurnal refleksi, dan skor peserta untuk menyusun ringkasan **Kompetensi Utama** dan **Area Yang Perlu Ditingkatkan**.',
         tags: ['Evaluation & Certificate'],
         security: [{ bearerAuth: [] }],
         parameters: [
-          { name: 'internshipId', in: 'path', required: true, schema: { type: 'string' } },
-          { name: 'applicantId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'internshipId', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+          { name: 'applicantId', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
         ],
-        responses: { 200: { description: 'Ringkasan AI berhasil di-generate' } },
+        responses: {
+          200: {
+            description: 'Ringkasan AI berhasil di-generate',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  data: {
+                    overallScore: 88,
+                    mainCompetencies: ['Sterilisasi Media Tanam', 'Formulasi AB Mix', 'Manajemen Drip Fertigation'],
+                    areasForImprovement: ['Deteksi Dini Hama Thrips'],
+                    summary: 'Peserta menunjukkan penguasaan yang luar biasa pada teknologi hidroponik modern.',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
     '/api/internships/{internshipId}/evaluations/{applicantId}/graduate': {
       post: {
-        summary: 'Luluskan Peserta & Terbitkan Sertifikat Digital PDF',
-        description: 'Petani meluluskan peserta. Sistem akan secara otomatis menggenerate file PDF Sertifikat Lanskap menggunakan PDFKit dengan nomor lisensi unik `JP-CERT-YYYY-XXXX`, mengunggah ke Supabase Storage, dan mengelolanya.',
+        summary: 'Luluskan Peserta & Terbitkan Sertifikat Digital PDF Lanskap',
+        description: 'Petani meluluskan peserta magang. Sistem secara otomatis membuat berkas Sertifikat Digital PDF Lanskap menggunakan PDFKit, menerbitkan nomor lisensi resmi `JP-CERT-YYYY-XXXX`, dan mengunggah file ke Supabase Storage.',
         tags: ['Evaluation & Certificate'],
         security: [{ bearerAuth: [] }],
         parameters: [
-          { name: 'internshipId', in: 'path', required: true, schema: { type: 'string' } },
-          { name: 'applicantId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'internshipId', in: 'path', required: true, schema: { type: 'string' }, example: 'i1234567-89ab-cdef-0123-456789abcdef' },
+          { name: 'applicantId', in: 'path', required: true, schema: { type: 'string' }, example: 'a1234567-89ab-cdef-0123-456789abcdef' },
         ],
-        responses: { 200: { description: 'Peserta dinyatakan LULUS & sertifikat PDF berhasil terbit' } },
+        responses: {
+          201: {
+            description: 'Peserta berhasil diluluskan & Sertifikat PDF diterbitkan',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Peserta berhasil diluluskan. Sertifikat digital telah terbit.',
+                  data: {
+                    certificate: {
+                      id: 'cert-12345',
+                      certificateNumber: 'JP-CERT-2026-0001',
+                      downloadUrl: 'https://be-jadipetani-production.up.railway.app/api/certificates/cert-12345/download',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
 
@@ -1003,35 +1271,53 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     // ============================================
     '/api/certificates/my': {
       get: {
-        summary: 'Daftar Sertifikat Kelulusan Milik Pelajar',
+        summary: 'Daftar Sertifikat Kelulusan Milik Pelajar Login',
+        description: 'Menampilkan seluruh daftar sertifikat digital yang berhasil diperoleh oleh pelajar.',
         tags: ['Certificates'],
         security: [{ bearerAuth: [] }],
-        responses: { 200: { description: 'Daftar sertifikat milik pelajar' } },
+        responses: {
+          200: { description: 'Daftar sertifikat pelajar berhasil diambil' },
+        },
       },
     },
     '/api/certificates/{id}': {
       get: {
         summary: 'Detail Data Sertifikat Digital',
+        description: 'Melihat rincian metadata sertifikat digital, nama penerbit, tanggal terbit, dan tautan unduh PDF.',
         tags: ['Certificates'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Detail sertifikat' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'cert-12345' },
+        ],
+        responses: {
+          200: { description: 'Detail sertifikat berhasil diambil' },
+        },
       },
       delete: {
-        summary: 'Cabut / Hapus Sertifikat',
+        summary: 'Cabut / Hapus Sertifikat Digital (Petani Pemilik)',
+        description: 'Membatalkan atau menghapus lisensi sertifikat digital.',
         tags: ['Certificates'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Sertifikat dihapus' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'cert-12345' },
+        ],
+        responses: {
+          200: { description: 'Sertifikat berhasil dihapus/dicabut' },
+        },
       },
     },
     '/api/certificates/{id}/download': {
       get: {
-        summary: 'Download File PDF Sertifikat',
+        summary: 'Download File PDF Sertifikat (302 Redirect / Stream)',
+        description: 'Mengunduh langsung berkas file PDF Sertifikat Lanskap resmi.',
         tags: ['Certificates'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 302: { description: 'Redirect langsung ke Public URL Supabase PDF' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'cert-12345' },
+        ],
+        responses: {
+          302: { description: 'Redirect 302 ke Supabase Storage Public PDF URL' },
+        },
       },
     },
 
@@ -1041,18 +1327,21 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/jobs': {
       get: {
         summary: 'Daftar Lowongan Kerja Profesional Published (Publik)',
+        description: 'Menampilkan daftar lowongan kerja profesional berstatus `PUBLISHED` (pembayaran Placement Fee telah settlement).',
         tags: ['Job Connector'],
         parameters: [
-          { name: 'search', in: 'query', schema: { type: 'string' } },
-          { name: 'location', in: 'query', schema: { type: 'string' } },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Cari judul pekerjaan' },
+          { name: 'location', in: 'query', schema: { type: 'string' }, description: 'Filter lokasi' },
           { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
           { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
         ],
-        responses: { 200: { description: 'Daftar lowongan kerja profesional' } },
+        responses: {
+          200: { description: 'Daftar lowongan pekerjaan publik' },
+        },
       },
       post: {
-        summary: 'Buat Lowongan Kerja + Generate Payment Token Midtrans Snap',
-        description: 'Petani membuat lowongan pekerjaan. Sistem otomatis menghitung **Placement Fee 50%** dari gaji tawaran dan mengembalikan token pembayaran Midtrans Snap (\`snapToken\`). Status awal: \`UNPAID\`.',
+        summary: 'Buat Lowongan Kerja + Generate Midtrans Snap Payment Token',
+        description: 'Petani membuat lowongan kerja. Backend menghitung **Placement Fee 50%** dari gaji tawaran dan menerbitkan Midtrans Snap Token (`snapToken`) untuk modal checkout pembayaran.',
         tags: ['Job Connector'],
         security: [{ bearerAuth: [] }],
         requestBody: {
@@ -1065,9 +1354,9 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
                 properties: {
                   title: { type: 'string', example: 'Manajer Kebun Kelapa Sawit' },
                   location: { type: 'string', example: 'Pekanbaru, Riau' },
-                  description: { type: 'string', example: 'Mengawasi operasional kebun sawit komersial 500 hektar.' },
+                  description: { type: 'string', example: 'Mengawasi operasional perkebunan sawit komersial 500 hektar.' },
                   qualifications: { type: 'string', example: 'S1 Pertanian, pengalaman lapangan minimal 3 tahun.' },
-                  offeredSalary: { type: 'integer', example: 8000000, description: 'Gaji bulanan Rp (Placement fee otomatis 50% = Rp 4.000.000)' },
+                  offeredSalary: { type: 'integer', description: 'Gaji bulanan Rp (Placement Fee otomatis 50% = Rp 4.000.000)', example: 8000000 },
                 },
               },
             },
@@ -1075,7 +1364,7 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
         },
         responses: {
           201: {
-            description: 'Lowongan dibuat & Midtrans Snap Token dihasilkan',
+            description: 'Lowongan kerja dibuat & Token Midtrans Snap berhasil diterbitkan',
             content: {
               'application/json': {
                 example: {
@@ -1102,65 +1391,33 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/jobs/my': {
       get: {
         summary: 'Daftar Lowongan Kerja Milik Petani Login',
+        description: 'Menampilkan seluruh lowongan kerja milik petani (semua status: UNPAID, PENDING_PAYMENT, PUBLISHED, EXPIRED, CLOSED).',
         tags: ['Job Connector'],
         security: [{ bearerAuth: [] }],
-        responses: { 200: { description: 'List lowongan kerja petani' } },
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+        ],
+        responses: { description: 'Daftar pekerjaan milik petani' },
       },
     },
     '/api/jobs/{id}': {
       get: {
-        summary: 'Detail Lowongan Kerja',
+        summary: 'Detail Lowongan Pekerjaan',
         tags: ['Job Connector'],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Detail lowongan kerja' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'j1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: { description: 'Detail pekerjaan berhasil diambil' },
       },
       put: {
-        summary: 'Edit Lowongan Kerja',
+        summary: 'Edit Data Lowongan Pekerjaan',
         tags: ['Job Connector'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Lowongan kerja diperbarui' } },
-      },
-      delete: {
-        summary: 'Hapus Lowongan Kerja',
-        tags: ['Job Connector'],
-        security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Lowongan kerja dihapus' } },
-      },
-    },
-    '/api/jobs/{id}/close': {
-      patch: {
-        summary: 'Tutup Lowongan Kerja Manual',
-        tags: ['Job Connector'],
-        security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Lowongan kerja ditutup' } },
-      },
-    },
-    '/api/jobs/{id}/retry-payment': {
-      post: {
-        summary: 'Buat Ulang Token Pembayaran Midtrans (Retry Payment)',
-        tags: ['Job Connector'],
-        security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Snap token baru berhasil dibuat' } },
-      },
-    },
-    '/api/jobs/{id}/payment-status': {
-      get: {
-        summary: 'Cek Status Transaksi Langsung ke Midtrans API (Reconciliation)',
-        tags: ['Job Connector'],
-        security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Status terkini transaksi dari Midtrans' } },
-      },
-    },
-    '/api/payments/midtrans/callback': {
-      post: {
-        summary: 'Webhook Notification Callback dari Server Midtrans',
-        description: 'Endpoint ini dipanggil otomatis oleh server Midtrans saat transaksi berubah status (`settlement`, `expire`, `deny`). Memverifikasi **SHA-512 Signature Key** & dijamin **idempotent**.',
-        tags: ['Payments'],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'j1234567-89ab-cdef-0123-456789abcdef' },
+        ],
         requestBody: {
           required: true,
           content: {
@@ -1168,17 +1425,92 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
               schema: {
                 type: 'object',
                 properties: {
+                  title: { type: 'string', example: 'Senior Farm Manager' },
+                  location: { type: 'string', example: 'Pekanbaru' },
+                  description: { type: 'string', example: 'Kelola operasional lahan.' },
+                  qualifications: { type: 'string', example: 'Pengalaman 5 tahun.' },
+                  offeredSalary: { type: 'integer', example: 10000000 },
+                },
+              },
+            },
+          },
+        },
+        responses: { description: 'Data lowongan kerja berhasil diperbarui' },
+      },
+      delete: {
+        summary: 'Hapus Lowongan Pekerjaan',
+        tags: ['Job Connector'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'j1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: { description: 'Lowongan kerja berhasil dihapus' },
+      },
+    },
+    '/api/jobs/{id}/close': {
+      patch: {
+        summary: 'Tutup Lowongan Pekerjaan Manual',
+        tags: ['Job Connector'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'j1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: { description: 'Lowongan kerja ditutup' },
+      },
+    },
+    '/api/jobs/{id}/retry-payment': {
+      post: {
+        summary: 'Buat Ulang Token Midtrans Snap (Retry Payment)',
+        description: 'Menerbitkan Snap token pembayaran baru jika transaksi pembayaran sebelumnya kadaluwarsa (*EXPIRED*) atau batal.',
+        tags: ['Job Connector'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'j1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: {
+          200: { description: 'Token Midtrans Snap baru berhasil diterbitkan' },
+        },
+      },
+    },
+    '/api/jobs/{id}/payment-status': {
+      get: {
+        summary: 'Cek Status Transaksi Langsung ke Midtrans API (Reconciliation)',
+        description: 'Melakukan rekonsiliasi manual dengan memeriksa status pembayaran langsung ke server Midtrans API.',
+        tags: ['Job Connector'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'j1234567-89ab-cdef-0123-456789abcdef' },
+        ],
+        responses: { description: 'Status transaksi terkini dari Midtrans' },
+      },
+    },
+    '/api/payments/midtrans/callback': {
+      post: {
+        summary: 'Webhook Notification Callback dari Server Midtrans',
+        description: 'Endpoint webhook otomatis yang dipanggil oleh server Midtrans. Memverifikasi **SHA-512 Signature Key** (`order_id` + `status_code` + `gross_amount` + `Server Key`) dan bersifat **idempotent**.',
+        tags: ['Payments'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['order_id', 'status_code', 'gross_amount', 'signature_key', 'transaction_status'],
+                properties: {
                   order_id: { type: 'string', example: 'JOB-FEE-1723456789-0123' },
                   status_code: { type: 'string', example: '200' },
                   gross_amount: { type: 'string', example: '4000000.00' },
-                  signature_key: { type: 'string', example: 'sha512-hash-key...' },
+                  signature_key: { type: 'string', example: 'a1b2c3d4e5f6...' },
                   transaction_status: { type: 'string', example: 'settlement' },
                 },
               },
             },
           },
         },
-        responses: { 200: { description: 'Callback berhasil diproses' } },
+        responses: {
+          200: { description: 'Callback webhook berhasil diproses & status lowongan diperbarui' },
+          401: { description: 'Signature key webhook tidak valid' },
+        },
       },
     },
 
@@ -1188,6 +1520,7 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/bookmarks': {
       post: {
         summary: 'Simpan / Bookmark Lowongan (Magang atau Pekerjaan)',
+        description: 'Pelajar menyimpan lowongan magang atau pekerjaan ke daftar bookmark favorit.',
         tags: ['Bookmarks'],
         security: [{ bearerAuth: [] }],
         requestBody: {
@@ -1204,24 +1537,34 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
             },
           },
         },
-        responses: { 201: { description: 'Lowongan berhasil di-bookmark' } },
+        responses: {
+          201: { description: 'Lowongan berhasil disimpan di bookmark' },
+        },
       },
     },
     '/api/bookmarks/my': {
       get: {
         summary: 'Daftar Bookmark Milik Pelajar Login',
+        description: 'Menampilkan seluruh daftar lowongan yang telah disimpan oleh pelajar.',
         tags: ['Bookmarks'],
         security: [{ bearerAuth: [] }],
-        responses: { 200: { description: 'Daftar bookmark pelajar' } },
+        responses: {
+          200: { description: 'Daftar bookmark pelajar berhasil diambil' },
+        },
       },
     },
     '/api/bookmarks/{id}': {
       delete: {
         summary: 'Hapus Bookmark',
+        description: 'Menghapus lowongan dari daftar simpanan bookmark.',
         tags: ['Bookmarks'],
         security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Bookmark berhasil dihapus' } },
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'bm-12345' },
+        ],
+        responses: {
+          200: { description: 'Bookmark berhasil dihapus' },
+        },
       },
     },
 
@@ -1231,11 +1574,12 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/dashboard/farmer': {
       get: {
         summary: 'Statistik Ringkasan Dashboard Petani',
+        description: 'Mengambil ringkasan matriks statistik untuk Dashboard Petani (total lowongan aktif, pelamar baru, peserta magang aktif, dan sertifikat yang terbit).',
         tags: ['Dashboard'],
         security: [{ bearerAuth: [] }],
         responses: {
           200: {
-            description: 'Statistik dashboard petani',
+            description: 'Statistik dashboard petani berhasil diambil',
             content: {
               'application/json': {
                 example: {
@@ -1256,11 +1600,12 @@ Selamat datang di Dokumentasi Interaktif API Backend **Jadipetani**! Halaman ini
     '/api/dashboard/student': {
       get: {
         summary: 'Statistik Ringkasan Dashboard Pelajar',
+        description: 'Mengambil ringkasan matriks statistik untuk Dashboard Pelajar (total lamaran aktif, program magang berjalan, jumlah checklist selesai, dan sertifikat didapat).',
         tags: ['Dashboard'],
         security: [{ bearerAuth: [] }],
         responses: {
           200: {
-            description: 'Statistik dashboard pelajar',
+            description: 'Statistik dashboard pelajar berhasil diambil',
             content: {
               'application/json': {
                 example: {
