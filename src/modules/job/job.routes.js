@@ -186,10 +186,11 @@ router.get('/:id', async (req, res, next) => {
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         try {
-          const jwt = require('../../utils/jwt');
+          const jwt = require('jsonwebtoken');
+          const { env } = require('../../config/env');
           const token = authHeader.split(' ')[1];
-          const decoded = jwt.verifyAccessToken(token);
-          if (decoded.id !== job.userId) {
+          const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET);
+          if (decoded.userId !== job.userId) {
             throw ApiError.notFound('Lowongan kerja tidak ditemukan');
           }
         } catch (e) {
