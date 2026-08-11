@@ -12,6 +12,7 @@ const app = express();
 // Configure allowed CORS origins
 const allowedOrigins = [
   'https://jadipetani.vercel.app',
+  'https://be-jadipetani-production.up.railway.app',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
@@ -34,7 +35,8 @@ const corsOptions = {
 
     if (
       allowedOrigins.includes(cleanOrigin) ||
-      /\.vercel\.app$/.test(cleanOrigin)
+      /\.vercel\.app$/.test(cleanOrigin) ||
+      /\.railway\.app$/.test(cleanOrigin)
     ) {
       return callback(null, true);
     }
