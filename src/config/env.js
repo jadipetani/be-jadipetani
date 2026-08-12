@@ -14,7 +14,7 @@ const envSchema = z.object({
   GEMINI_API_KEY: z.string().trim().min(1),
   MIDTRANS_SERVER_KEY: z.string().trim().min(1),
   MIDTRANS_CLIENT_KEY: z.string().trim().min(1),
-  MIDTRANS_IS_PRODUCTION: z.coerce.boolean().default(false),
+  MIDTRANS_IS_PRODUCTION: z.preprocess((val) => String(val).toLowerCase() === 'true', z.boolean()).default(false),
   RESEND_API_KEY: z.string().trim().min(1),
   SENTRY_DSN: z.string().trim().optional(),
 });
