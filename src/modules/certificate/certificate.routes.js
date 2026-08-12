@@ -73,8 +73,8 @@ router.get('/:id', auth, async (req, res, next) => {
   }
 });
 
-// GET /api/certificates/:id/download — Download PDF
-router.get('/:id/download', auth, async (req, res, next) => {
+// GET /api/certificates/:id/download — Download PDF (Public download link)
+router.get('/:id/download', async (req, res, next) => {
   try {
     const cert = await prisma.certificate.findFirst({
       where: {
