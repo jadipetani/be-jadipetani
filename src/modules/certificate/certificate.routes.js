@@ -42,18 +42,32 @@ router.get('/my', auth, async (req, res, next) => {
 // GET /api/certificates/:id — Detail sertifikat
 router.get('/:id', auth, async (req, res, next) => {
   try {
-    const cert = await prisma.certificate.findUnique({
-      where: { id: req.params.id },
+    const cert = await prisma.certificate.findFirst({
+      where: {
+        OR: [
+          { id: req.params.id },
+          { applicationId: req.params.id },
+        ],
+      },
       include: {
         student: { select: { id: true, fullName: true } },
         application: {
-          include: { internship: { select: { id: true, title: true, commodity: true, location: true, durationMonths: true } } },
+          include: {
+            internship: { select: { id: true, title: true, commodity: true, location: true, durationMonths: true, user: { select: { fullName: true } } } },
+          },
         },
       },
     });
     if (!cert) throw ApiError.notFound('Sertifikat tidak ditemukan');
 
-    return success(res, { data: cert });
+    return success(res, {
+      data: {
+        ...cert,
+        studentName: cert.student?.fullName || '',
+        internshipTitle: cert.application?.internship?.title || '',
+        farmerName: cert.application?.internship?.user?.fullName || '',
+      },
+    });
   } catch (error) {
     next(error);
   }

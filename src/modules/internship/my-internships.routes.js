@@ -183,4 +183,26 @@ router.post('/:id/logbook/week/:weekNumber/evidence', auth, authorize('STUDENT')
   }
 });
 
+// POST /api/my-internships/:id/finish — Pelajar mengajukan penyelesaian magang (Selesai Magang)
+router.post('/:id/finish', auth, authorize('STUDENT'), async (req, res, next) => {
+  try {
+    const application = await prisma.application.findFirst({
+      where: {
+        id: req.params.id,
+        studentId: req.user.id,
+        status: 'ACCEPTED',
+      },
+    });
+
+    if (!application) throw ApiError.notFound('Program magang aktif tidak ditemukan atau sudah diselesaikan');
+
+    return success(res, {
+      message: 'Pengajuan penyelesaian magang berhasil dikirim. Menunggu konfirmasi kelulusan & penerbitan sertifikat dari Petani Pembimbing.',
+      data: { applicationId: application.id, status: 'PENDING_GRADUATION' },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
