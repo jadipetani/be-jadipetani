@@ -28,18 +28,29 @@ router.get('/', auth, authorize('STUDENT'), async (req, res, next) => {
           internship: {
             select: { id: true, title: true, commodity: true, location: true, durationMonths: true, user: { select: { fullName: true } } },
           },
+          logbookEntries: {
+            select: { completionPercentage: true },
+          },
         },
       }),
       prisma.application.count({ where }),
     ]);
 
     return success(res, {
-      data: applications.map((app) => ({
-        applicationId: app.id,
-        status: app.status,
-        appliedAt: app.createdAt,
-        internship: app.internship,
-      })),
+      data: applications.map((app) => {
+        const entries = app.logbookEntries || [];
+        const overallProgress = entries.length > 0
+          ? Math.round(entries.reduce((sum, e) => sum + (e.completionPercentage || 0), 0) / entries.length)
+          : 0;
+
+        return {
+          applicationId: app.id,
+          status: app.status,
+          appliedAt: app.createdAt,
+          overallProgress,
+          internship: app.internship,
+        };
+      }),
       meta: paginationMeta(total, page, limit),
     });
   } catch (error) {
@@ -67,9 +78,10 @@ router.get('/:id/logbook', auth, authorize('STUDENT'), async (req, res, next) =>
 
     if (!application) throw ApiError.notFound('Data magang tidak ditemukan');
 
-    const totalWeeks = application.logbookEntries.length;
-    const completedWeeks = application.logbookEntries.filter((e) => e.status === 'COMPLETED').length;
-    const overallProgress = totalWeeks > 0 ? Math.round((completedWeeks / totalWeeks) * 100) : 0;
+    const entries = application.logbookEntries || [];
+    const overallProgress = entries.length > 0
+      ? Math.round(entries.reduce((sum, e) => sum + (e.completionPercentage || 0), 0) / entries.length)
+      : 0;
 
     return success(res, {
       data: {

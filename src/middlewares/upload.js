@@ -38,8 +38,8 @@ const uploadPortfolio = multer({
 const uploadDocumentation = multer({
   storage,
   limits: { fileSize: MAX_FILE_SIZE },
-  fileFilter: fileFilter(['image/jpeg', 'image/png']),
-}).array('documentation', 10);
+  fileFilter: fileFilter(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']),
+}).any();
 
 // Upload Application (CV wajib + portfolio opsional)
 const uploadApplication = multer({

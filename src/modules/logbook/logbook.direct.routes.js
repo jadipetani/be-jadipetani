@@ -15,7 +15,14 @@ router.get('/:entryId', auth, async (req, res, next) => {
       include: {
         activities: true,
         documentations: true,
-        application: { select: { studentId: true, internship: { select: { userId: true } } } },
+        application: {
+          select: {
+            id: true,
+            studentId: true,
+            internshipId: true,
+            internship: { select: { id: true, title: true, userId: true } },
+          },
+        },
       },
     });
     if (!entry) throw ApiError.notFound('Logbook entry tidak ditemukan');
@@ -29,7 +36,7 @@ router.get('/:entryId', auth, async (req, res, next) => {
     const docs = await Promise.all(
       entry.documentations.map(async (doc) => ({
         id: doc.id,
-        url: await getSignedUrl('logbook-docs', doc.filePath),
+        url: doc.url || await getSignedUrl('logbook-docs', doc.filePath),
         createdAt: doc.createdAt,
       }))
     );
@@ -37,6 +44,9 @@ router.get('/:entryId', auth, async (req, res, next) => {
     return success(res, {
       data: {
         ...entry,
+        applicationId: entry.applicationId || entry.application?.id,
+        internshipId: entry.application?.internshipId || entry.application?.internship?.id,
+        internshipTitle: entry.application?.internship?.title || '',
         documentations: docs,
         application: undefined,
       },
@@ -102,17 +112,18 @@ router.post('/:entryId/documentation', auth, authorize('STUDENT'), uploadDocumen
   try {
     const entry = await prisma.logbookEntry.findUnique({
       where: { id: req.params.entryId },
-      include: { application: { select: { studentId: true } } },
+      include: { application: { select: { id: true, studentId: true } } },
     });
     if (!entry) throw ApiError.notFound('Logbook entry tidak ditemukan');
     if (req.user.id !== entry.application.studentId) throw ApiError.forbidden();
 
-    if (!req.files || req.files.length === 0) {
-      throw ApiError.badRequest('Minimal upload 1 file');
+    const rawFiles = req.files || (req.file ? [req.file] : []);
+    if (rawFiles.length === 0) {
+      throw ApiError.badRequest('Minimal upload 1 file foto dokumentasi');
     }
 
     const docs = [];
-    for (const file of req.files) {
+    for (const file of rawFiles) {
       const result = await uploadToSupabase(file.buffer, file.originalname, 'logbook-docs', req.params.entryId);
       const doc = await prisma.logbookDocumentation.create({
         data: {
@@ -123,6 +134,15 @@ router.post('/:entryId/documentation', auth, authorize('STUDENT'), uploadDocumen
       });
       docs.push(doc);
     }
+
+    // Update evaluation documentation count
+    const totalDocs = await prisma.logbookDocumentation.count({
+      where: { logbookEntryId: req.params.entryId },
+    });
+    await prisma.evaluation.updateMany({
+      where: { applicationId: entry.application.id, weekNumber: entry.weekNumber },
+      data: { documentationCount: totalDocs },
+    });
 
     return success(res, { statusCode: 201, message: 'Dokumentasi berhasil diupload', data: docs });
   } catch (error) {
