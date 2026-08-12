@@ -103,15 +103,21 @@ router.get('/:id/applicants', auth, authorize('FARMER'), async (req, res, next) 
         take: limit,
         orderBy: { createdAt: 'desc' },
         select: {
-          id: true, status: true, createdAt: true,
-          student: { select: { id: true, fullName: true, institution: true } },
+          id: true, status: true, createdAt: true, motivation: true, cvUrl: true, portfolioUrl: true,
+          student: { select: { id: true, fullName: true, institution: true, email: true, phone: true } },
         },
       }),
       prisma.application.count({ where }),
     ]);
 
+    const mapped = applications.map((app) => ({
+      ...app,
+      studentName: app.student?.fullName || '',
+      student: app.student ? { ...app.student, name: app.student.fullName } : null,
+    }));
+
     return success(res, {
-      data: applications,
+      data: mapped,
       meta: { ...paginationMeta(total, page, limit), quota: internship.quota, acceptedCount: internship.acceptedCount },
     });
   } catch (error) {

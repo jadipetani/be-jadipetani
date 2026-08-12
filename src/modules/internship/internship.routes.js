@@ -118,13 +118,19 @@ router.get('/', async (req, res, next) => {
           durationMonths: true, quota: true, acceptedCount: true,
           deadline: true, status: true, createdAt: true,
           user: { select: { id: true, fullName: true } },
+          _count: { select: { applications: true } },
         },
       }),
       prisma.internship.count({ where }),
     ]);
 
     return success(res, {
-      data: internships.map((i) => ({ ...i, farmer: i.user, user: undefined })),
+      data: internships.map((i) => ({
+        ...i,
+        applicantsCount: i._count?.applications || 0,
+        farmer: i.user,
+        user: undefined,
+      })),
       meta: paginationMeta(total, page, limit),
     });
   } catch (error) {
