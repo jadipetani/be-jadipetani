@@ -131,8 +131,8 @@ router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) =>
 
       // 3. Auto-generate logbook entries & activities from curriculum if not exist
       for (const week of application.internship.curriculumWeeks) {
-        const existingEntry = await tx.logbookEntry.findUnique({
-          where: { applicationId_weekNumber: { applicationId: application.id, weekNumber: week.weekNumber } },
+        const existingEntry = await tx.logbookEntry.findFirst({
+          where: { applicationId: application.id, weekNumber: week.weekNumber },
         });
 
         if (!existingEntry) {
@@ -157,8 +157,8 @@ router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) =>
           });
         }
 
-        const existingEval = await tx.evaluation.findUnique({
-          where: { applicationId_weekNumber: { applicationId: application.id, weekNumber: week.weekNumber } },
+        const existingEval = await tx.evaluation.findFirst({
+          where: { applicationId: application.id, weekNumber: week.weekNumber },
         });
 
         if (!existingEval) {
