@@ -76,10 +76,62 @@ router.get('/:id', auth, async (req, res, next) => {
 // GET /api/certificates/:id/download — Download PDF
 router.get('/:id/download', auth, async (req, res, next) => {
   try {
-    const cert = await prisma.certificate.findUnique({ where: { id: req.params.id } });
-    if (!cert) throw ApiError.notFound('Sertifikat tidak ditemukan');
-    if (!cert.pdfUrl) throw ApiError.badRequest('Sertifikat PDF belum tersedia');
+    const cert = await prisma.certificate.findFirst({
+      where: {
+        OR: [
+          { id: req.params.id },
+          { applicationId: req.params.id },
+        ],
+      },
+      include: {
+        student: { select: { id: true, fullName: true } },
+        application: {
+          include: {
+            internship: {
+              select: {
+                title: true,
+                commodity: true,
+                location: true,
+                durationMonths: true,
+                user: { select: { fullName: true } },
+                curriculumWeeks: { select: { title: true } },
+              },
+            },
+          },
+        },
+      },
+    });
 
+    if (!cert) throw ApiError.notFound('Sertifikat tidak ditemukan');
+
+    // Always generate/sync fresh PDF matching live student & internship details
+    try {
+      const { generateAndUploadCertificate } = require('../../utils/pdfGenerator');
+      const skills = cert.application?.internship?.curriculumWeeks?.map((w) => w.title) || [];
+      const pdfResult = await generateAndUploadCertificate({
+        certificateNumber: cert.certificateNumber,
+        studentName: cert.student?.fullName || 'Peserta Magang',
+        internshipTitle: cert.application?.internship?.title || 'Program Magang Pertanian',
+        commodity: cert.application?.internship?.commodity || 'Agribisnis',
+        location: cert.application?.internship?.location || 'Indonesia',
+        durationMonths: cert.application?.internship?.durationMonths || 1,
+        skills,
+        farmerName: cert.application?.internship?.user?.fullName || 'Petani Pembimbing',
+        issuedDate: cert.issuedAt ? new Date(cert.issuedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID'),
+      });
+
+      if (pdfResult.pdfUrl && pdfResult.pdfUrl !== cert.pdfUrl) {
+        await prisma.certificate.update({
+          where: { id: cert.id },
+          data: { pdfUrl: pdfResult.pdfUrl, pdfPath: pdfResult.pdfPath },
+        });
+        cert.pdfUrl = pdfResult.pdfUrl;
+      }
+    } catch (pdfErr) {
+      console.warn('[PDF Sync Warning] Regeneration fallback:', pdfErr.message);
+    }
+
+    if (!cert.pdfUrl) throw ApiError.badRequest('Sertifikat PDF belum tersedia');
     return res.redirect(cert.pdfUrl);
   } catch (error) {
     next(error);
