@@ -39,7 +39,7 @@ router.get('/my', auth, async (req, res, next) => {
   }
 });
 
-// GET /api/certificates/:id — Detail sertifikat
+// GET /api/certificates/:id — Detail sertifikat & transkrip
 router.get('/:id', auth, async (req, res, next) => {
   try {
     const cert = await prisma.certificate.findFirst({
@@ -50,22 +50,48 @@ router.get('/:id', auth, async (req, res, next) => {
         ],
       },
       include: {
-        student: { select: { id: true, fullName: true } },
+        student: { select: { id: true, fullName: true, institution: true } },
         application: {
           include: {
-            internship: { select: { id: true, title: true, commodity: true, location: true, durationMonths: true, user: { select: { fullName: true } } } },
+            internship: {
+              select: {
+                id: true,
+                title: true,
+                commodity: true,
+                location: true,
+                durationMonths: true,
+                durationWeeks: true,
+                user: { select: { fullName: true } },
+                curriculumWeeks: { orderBy: { weekNumber: 'asc' } },
+              },
+            },
+            evaluations: {
+              orderBy: { weekNumber: 'asc' },
+            },
           },
         },
       },
     });
     if (!cert) throw ApiError.notFound('Sertifikat tidak ditemukan');
 
+    const curriculumMap = {};
+    (cert.application?.internship?.curriculumWeeks || []).forEach((w) => {
+      curriculumMap[w.weekNumber] = w.title;
+    });
+
+    const evaluationsWithTitles = (cert.application?.evaluations || []).map((ev) => ({
+      ...ev,
+      title: curriculumMap[ev.weekNumber] || `Evaluasi Mingguan ke-${ev.weekNumber}`,
+    }));
+
     return success(res, {
       data: {
         ...cert,
         studentName: cert.student?.fullName || '',
+        studentInstitution: cert.student?.institution || '',
         internshipTitle: cert.application?.internship?.title || '',
         farmerName: cert.application?.internship?.user?.fullName || '',
+        evaluations: evaluationsWithTitles,
       },
     });
   } catch (error) {
