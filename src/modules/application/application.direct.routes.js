@@ -100,7 +100,15 @@ router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) =>
 
     if (!application) throw ApiError.notFound('Lamaran tidak ditemukan');
     if (application.internship.userId !== req.user.id) throw ApiError.forbidden();
-    if (application.status !== 'REVIEW') throw ApiError.badRequest('Lamaran sudah diproses sebelumnya');
+
+    // Idempotent check: If already ACCEPTED, return success directly
+    if (application.status === 'ACCEPTED') {
+      return success(res, { message: 'Lamaran ini sudah diterima sebelumnya. Logbook peserta telah aktif.' });
+    }
+
+    if (application.status !== 'REVIEW') {
+      throw ApiError.badRequest(`Lamaran tidak dapat diterima karena status saat ini: ${application.status}`);
+    }
 
     // Quota check
     if (application.internship.acceptedCount >= application.internship.quota) {
@@ -121,49 +129,67 @@ router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) =>
         data: { acceptedCount: { increment: 1 } },
       });
 
-      // 3. Auto-generate logbook entries & activities from curriculum
+      // 3. Auto-generate logbook entries & activities from curriculum if not exist
       for (const week of application.internship.curriculumWeeks) {
-        await tx.logbookEntry.create({
-          data: {
-            applicationId: application.id,
-            weekNumber: week.weekNumber,
-            title: week.title,
-            description: week.description,
-            status: 'NOT_STARTED',
-            completionPercentage: 0,
-            activities: {
-              create: week.activities.map((act) => ({
-                name: act.name,
-                description: act.description,
-                weight: act.weight,
-                isCompleted: false,
-                curriculumActivityId: act.id,
-              })),
-            },
-          },
+        const existingEntry = await tx.logbookEntry.findUnique({
+          where: { applicationId_weekNumber: { applicationId: application.id, weekNumber: week.weekNumber } },
         });
 
-        // 4. Create empty evaluation record for each week
-        await tx.evaluation.create({
-          data: {
-            applicationId: application.id,
-            weekNumber: week.weekNumber,
-            checklistCompleted: 0,
-            checklistTotal: week.activities.length,
-            documentationCount: 0,
-            status: 'PENDING',
-          },
+        if (!existingEntry) {
+          await tx.logbookEntry.create({
+            data: {
+              applicationId: application.id,
+              weekNumber: week.weekNumber,
+              title: week.title,
+              description: week.description,
+              status: 'NOT_STARTED',
+              completionPercentage: 0,
+              activities: {
+                create: week.activities.map((act) => ({
+                  name: act.name,
+                  description: act.description,
+                  weight: act.weight,
+                  isCompleted: false,
+                  curriculumActivityId: act.id,
+                })),
+              },
+            },
+          });
+        }
+
+        const existingEval = await tx.evaluation.findUnique({
+          where: { applicationId_weekNumber: { applicationId: application.id, weekNumber: week.weekNumber } },
         });
+
+        if (!existingEval) {
+          await tx.evaluation.create({
+            data: {
+              applicationId: application.id,
+              weekNumber: week.weekNumber,
+              checklistCompleted: 0,
+              checklistTotal: week.activities.length,
+              documentationCount: 0,
+              status: 'PENDING',
+            },
+          });
+        }
       }
     });
 
-    // Send acceptance email
-    const emailData = applicationAcceptedEmail(
-      application.student.fullName,
-      application.internship.title,
-      application.internship.user.fullName
-    );
-    sendEmail({ to: application.student.email, ...emailData });
+    // Send acceptance email safely
+    try {
+      const farmerName = application.internship?.user?.fullName || 'Petani';
+      const emailData = applicationAcceptedEmail(
+        application.student.fullName,
+        application.internship.title,
+        farmerName
+      );
+      sendEmail({ to: application.student.email, ...emailData }).catch((e) =>
+        console.error('[Email Error] Accept notification failed:', e.message)
+      );
+    } catch (emailErr) {
+      console.warn('[Email Warning] Error crafting accept email:', emailErr.message);
+    }
 
     return success(res, { message: 'Lamaran berhasil diterima. Logbook peserta telah dibuat.' });
   } catch (error) {

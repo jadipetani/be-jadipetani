@@ -5,13 +5,18 @@ const { success } = require('../../utils/apiResponse');
 const prisma = require('../../config/database');
 const ApiError = require('../../utils/apiError');
 
-// GET /api/certificates/my — List sertifikat milik pelajar
-router.get('/my', auth, authorize('STUDENT'), async (req, res, next) => {
+// GET /api/certificates/my — List sertifikat milik pelajar / yang diterbitkan petani
+router.get('/my', auth, async (req, res, next) => {
   try {
+    const where = req.user.role === 'FARMER'
+      ? { application: { internship: { userId: req.user.id } } }
+      : { studentId: req.user.id };
+
     const certificates = await prisma.certificate.findMany({
-      where: { studentId: req.user.id },
+      where,
       orderBy: { issuedAt: 'desc' },
       include: {
+        student: { select: { id: true, fullName: true } },
         application: {
           include: { internship: { select: { id: true, title: true } } },
         },
@@ -22,8 +27,11 @@ router.get('/my', auth, authorize('STUDENT'), async (req, res, next) => {
       data: certificates.map((c) => ({
         id: c.id,
         certificateNumber: c.certificateNumber,
+        studentName: c.student?.fullName || '',
         internship: c.application?.internship || null,
+        internshipTitle: c.application?.internship?.title || '',
         issuedAt: c.issuedAt,
+        pdfUrl: c.pdfUrl,
       })),
     });
   } catch (error) {
