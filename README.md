@@ -1,6 +1,6 @@
 # 🌾 Jadipetani Backend API
 
-Backend RESTful API untuk platform **Jadipetani** — menghubungkan petani dengan mahasiswa/pelajar pertanian melalui program magang terstruktur, AI Curriculum Generator, AI Logbook, Sertifikat Digital PDF, serta Job Connector (Lowongan Kerja Profesional & Payment Gateway).
+Backend RESTful API untuk platform **Jadipetani** — menghubungkan petani dengan mahasiswa/pelajar pertanian melalui program magang terstruktur, AI Curriculum Generator, AI Logbook, Sertifikat Magang Digital PDF, serta Job Connector (Lowongan Kerja Profesional & Payment Gateway).
 
 ---
 
