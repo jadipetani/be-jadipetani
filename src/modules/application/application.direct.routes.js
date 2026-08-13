@@ -82,7 +82,7 @@ router.get('/:id', auth, async (req, res, next) => {
   }
 });
 
-// PATCH /api/applications/:id/accept — Terima pendaftar
+// PATCH /api/applications/:id/accept — Terima pendaftar (Magang / Job)
 router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) => {
   try {
     const application = await prisma.application.findUnique({
@@ -95,24 +95,33 @@ router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) =>
             user: { select: { fullName: true } },
           },
         },
+        job: {
+          include: {
+            user: { select: { fullName: true } },
+          },
+        },
       },
     });
 
     if (!application) throw ApiError.notFound('Lamaran tidak ditemukan');
-    if (application.internship.userId !== req.user.id) throw ApiError.forbidden();
+
+    const targetUserId = application.type === 'JOB' ? application.job?.userId : application.internship?.userId;
+    if (!targetUserId || targetUserId !== req.user.id) throw ApiError.forbidden();
 
     // Idempotent check: If already ACCEPTED, return success directly
     if (application.status === 'ACCEPTED') {
-      return success(res, { message: 'Lamaran ini sudah diterima sebelumnya. Logbook peserta telah aktif.' });
+      return success(res, { message: 'Lamaran ini sudah diterima sebelumnya.' });
     }
 
     if (application.status !== 'REVIEW') {
       throw ApiError.badRequest(`Lamaran tidak dapat diterima karena status saat ini: ${application.status}`);
     }
 
-    // Quota check
-    if (application.internship.acceptedCount >= application.internship.quota) {
-      throw ApiError.badRequest('Kuota magang sudah penuh');
+    // Quota check (for Internship)
+    if (application.type === 'INTERNSHIP' && application.internship) {
+      if (application.internship.acceptedCount >= application.internship.quota) {
+        throw ApiError.badRequest('Kuota magang sudah penuh');
+      }
     }
 
     // Execute in transaction
@@ -123,65 +132,68 @@ router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) =>
         data: { status: 'ACCEPTED' },
       });
 
-      // 2. Increment acceptedCount
-      await tx.internship.update({
-        where: { id: application.internshipId },
-        data: { acceptedCount: { increment: 1 } },
-      });
-
-      // 3. Auto-generate logbook entries & activities from curriculum if not exist
-      for (const week of application.internship.curriculumWeeks) {
-        const existingEntry = await tx.logbookEntry.findFirst({
-          where: { applicationId: application.id, weekNumber: week.weekNumber },
+      // 2. Additional steps for INTERNSHIP applications
+      if (application.type === 'INTERNSHIP' && application.internship) {
+        await tx.internship.update({
+          where: { id: application.internshipId },
+          data: { acceptedCount: { increment: 1 } },
         });
 
-        if (!existingEntry) {
-          await tx.logbookEntry.create({
-            data: {
-              applicationId: application.id,
-              weekNumber: week.weekNumber,
-              title: week.title,
-              description: week.description,
-              status: 'NOT_STARTED',
-              completionPercentage: 0,
-              activities: {
-                create: week.activities.map((act) => ({
-                  name: act.name,
-                  description: act.description,
-                  weight: act.weight,
-                  isCompleted: false,
-                  curriculumActivityId: act.id,
-                })),
+        // Auto-generate logbook entries & activities from curriculum if not exist
+        for (const week of application.internship.curriculumWeeks) {
+          const existingEntry = await tx.logbookEntry.findFirst({
+            where: { applicationId: application.id, weekNumber: week.weekNumber },
+          });
+
+          if (!existingEntry) {
+            await tx.logbookEntry.create({
+              data: {
+                applicationId: application.id,
+                weekNumber: week.weekNumber,
+                title: week.title,
+                description: week.description,
+                status: 'NOT_STARTED',
+                completionPercentage: 0,
+                activities: {
+                  create: week.activities.map((act) => ({
+                    name: act.name,
+                    description: act.description,
+                    weight: act.weight,
+                    isCompleted: false,
+                    curriculumActivityId: act.id,
+                  })),
+                },
               },
-            },
-          });
-        }
+            });
+          }
 
-        const existingEval = await tx.evaluation.findFirst({
-          where: { applicationId: application.id, weekNumber: week.weekNumber },
-        });
-
-        if (!existingEval) {
-          await tx.evaluation.create({
-            data: {
-              applicationId: application.id,
-              weekNumber: week.weekNumber,
-              checklistCompleted: 0,
-              checklistTotal: week.activities.length,
-              documentationCount: 0,
-              status: 'PENDING',
-            },
+          const existingEval = await tx.evaluation.findFirst({
+            where: { applicationId: application.id, weekNumber: week.weekNumber },
           });
+
+          if (!existingEval) {
+            await tx.evaluation.create({
+              data: {
+                applicationId: application.id,
+                weekNumber: week.weekNumber,
+                checklistCompleted: 0,
+                checklistTotal: week.activities.length,
+                documentationCount: 0,
+                status: 'PENDING',
+              },
+            });
+          }
         }
       }
     });
 
     // Send acceptance email safely
     try {
-      const farmerName = application.internship?.user?.fullName || 'Petani';
+      const farmerName = application.job?.user?.fullName || application.internship?.user?.fullName || 'Petani';
+      const programTitle = application.job?.title || application.internship?.title || 'Program';
       const emailData = applicationAcceptedEmail(
         application.student.fullName,
-        application.internship.title,
+        programTitle,
         farmerName
       );
       sendEmail({ to: application.student.email, ...emailData }).catch((e) =>
@@ -191,13 +203,13 @@ router.patch('/:id/accept', auth, authorize('FARMER'), async (req, res, next) =>
       console.warn('[Email Warning] Error crafting accept email:', emailErr.message);
     }
 
-    return success(res, { message: 'Lamaran berhasil diterima. Logbook peserta telah dibuat.' });
+    return success(res, { message: 'Lamaran berhasil diterima.' });
   } catch (error) {
     next(error);
   }
 });
 
-// PATCH /api/applications/:id/reject — Tolak pendaftar
+// PATCH /api/applications/:id/reject — Tolak pendaftar (Magang / Job)
 router.patch('/:id/reject', auth, authorize('FARMER'), async (req, res, next) => {
   try {
     const application = await prisma.application.findUnique({
@@ -205,11 +217,13 @@ router.patch('/:id/reject', auth, authorize('FARMER'), async (req, res, next) =>
       include: {
         student: { select: { fullName: true, email: true } },
         internship: { select: { title: true, userId: true } },
+        job: { select: { title: true, userId: true } },
       },
     });
 
     if (!application) throw ApiError.notFound('Lamaran tidak ditemukan');
-    if (application.internship.userId !== req.user.id) throw ApiError.forbidden();
+    const targetUserId = application.type === 'JOB' ? application.job?.userId : application.internship?.userId;
+    if (!targetUserId || targetUserId !== req.user.id) throw ApiError.forbidden();
     if (application.status !== 'REVIEW') throw ApiError.badRequest('Lamaran sudah diproses sebelumnya');
 
     await prisma.application.update({
@@ -217,9 +231,16 @@ router.patch('/:id/reject', auth, authorize('FARMER'), async (req, res, next) =>
       data: { status: 'REJECTED' },
     });
 
-    // Send rejection email
-    const emailData = applicationRejectedEmail(application.student.fullName, application.internship.title);
-    sendEmail({ to: application.student.email, ...emailData });
+    // Send rejection email safely
+    try {
+      const programTitle = application.job?.title || application.internship?.title || 'Program';
+      const emailData = applicationRejectedEmail(application.student.fullName, programTitle);
+      sendEmail({ to: application.student.email, ...emailData }).catch((e) =>
+        console.error('[Email Error] Reject notification failed:', e.message)
+      );
+    } catch (emailErr) {
+      console.warn('[Email Warning] Error crafting reject email:', emailErr.message);
+    }
 
     return success(res, { message: 'Lamaran ditolak' });
   } catch (error) {
