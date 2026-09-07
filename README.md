@@ -116,7 +116,7 @@ Server aktif di `http://localhost:5000`.
 | **npm** | v10.8.2 |
 | **Database** | PostgreSQL 15 (Supabase) |
 | **API Base URL (Dev)** | `http://localhost:5000/api` |
-| **API Base URL (Prod)** | `https://be-jadipetani-production.up.railway.app/api` |
+| **API Base URL (Prod)** | `https://be-jadipetani-production.up.railway.app/docs` |
 | **Midtrans** | Sandbox Mode |
 
 ---
