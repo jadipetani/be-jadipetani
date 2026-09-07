@@ -1,29 +1,44 @@
-# 🌾 Jadipetani Backend API
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jadipetani/be-jadipetani/main/docs/logo-jadipetani.jpg" alt="Jadipetani Logo" width="100" />
+</p>
 
-Backend RESTful API untuk platform **Jadipetani** — menghubungkan petani dengan mahasiswa/pelajar pertanian melalui program magang terstruktur, AI Curriculum Generator, AI Logbook, Sertifikat Magang Digital PDF, serta Job Connector (Lowongan Kerja Profesional & Payment Gateway).
+<h1 align="center">⚙️ Jadipetani — Backend API</h1>
+
+<p align="center">
+  Backend RESTful API untuk platform <strong>Jadipetani</strong> — menghubungkan petani dengan pelajar melalui program magang terstruktur, AI Curriculum Generator, AI Logbook, Sertifikat Digital PDF, serta Job Connector & Payment Gateway.
+</p>
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Runtime**: Node.js v20+
-- **Framework**: Express.js
-- **Database**: PostgreSQL (Supabase Connection Pooler)
-- **ORM**: Prisma Client v5.x
-- **Authentication**: Custom JWT (Access Token 1h + Refresh Token in httpOnly Cookie 30d) + `bcrypt` (salt 12)
-- **Storage**: Supabase Storage (`cv`, `portfolios`, `logbook-docs`, `certificates`)
-- **AI Integration**: Google Gemini API (`@google/generative-ai`)
-- **Email Service**: Resend API (`resend`)
-- **PDF Generation**: PDFKit (`pdfkit`)
-- **Payment Gateway**: Midtrans Snap (`midtrans-client`)
-- **Validation**: Zod (`zod`)
-- **Security**: Helmet, CORS, Express Rate Limit
+| Kategori | Teknologi |
+|----------|-----------|
+| **Runtime** | Node.js v20+ |
+| **Framework** | Express.js 5 |
+| **Database** | PostgreSQL 15 (Supabase Connection Pooler) |
+| **ORM** | Prisma Client v5.x |
+| **Autentikasi** | JWT (Access Token 1h + Refresh Token httpOnly Cookie 30d) + bcrypt (salt 12) |
+| **Storage** | Supabase Storage (`cv`, `portfolios`, `logbook-docs`, `certificates`) |
+| **AI** | Google Gemini API (`@google/generative-ai`) |
+| **Email** | Resend API |
+| **PDF** | PDFKit |
+| **Payment** | Midtrans Snap (`midtrans-client`) |
+| **Validasi** | Zod |
+| **Keamanan** | Helmet, CORS, Express Rate Limit |
 
 ---
 
-## 🚀 Quick Start (Pengembangan Lokal)
+## 🚀 Panduan Instalasi
+
+### Prasyarat
+
+- **Node.js** ≥ 20.x
+- **npm** ≥ 9.x
+- **PostgreSQL** (disarankan via Supabase)
 
 ### 1. Clone & Install Dependencies
+
 ```bash
 git clone https://github.com/jadipetani/be-jadipetani.git
 cd be-jadipetani
@@ -31,53 +46,47 @@ npm install
 ```
 
 ### 2. Setup Environment Variables
-Salin `.env.example` menjadi `.env`:
+
 ```bash
 cp .env.example .env
 ```
 
-Isi variabel environment di file `.env` (lihat tabel di bawah).
+Isi variabel di file `.env` (lihat tabel di bawah).
 
 ### 3. Database Migration & Seed Data
+
 ```bash
 # Generate Prisma Client
 npm run prisma:generate
 
-# Jalankan Migrasi Database ke Supabase
+# Jalankan migrasi database
 npm run prisma:migrate
 
-# Isi Data Demo / Testing
+# Isi data demo
 npm run prisma:seed
 ```
 
-### 4. Jalankan Server (Development Mode)
+### 4. Jalankan Server (Development)
+
 ```bash
 npm run dev
 ```
-Server akan aktif di `http://localhost:5000`.
+
+Server aktif di `http://localhost:5000`.
 
 ---
 
-## 📑 Akun Demo (Hasil Seeding)
-
-| Role | Email | Password | Keterangan |
-|------|-------|----------|------------|
-| **Petani (FARMER)** | `petani@jadipetani.com` | `farmer123` | Pak Budi Sugiharto (Lembang) |
-| **Pelajar (STUDENT)** | `pelajar@jadipetani.com` | `student123` | Ahmad Rizky (IPB University) |
-
----
-
-## 🔑 Environment Variables Reference
+## 🔑 Environment Variables
 
 | Variable | Deskripsi | Wajib |
 |----------|-----------|-------|
-| `NODE_ENV` | Environment mode (`development` / `production`) | ✅ |
-| `PORT` | Port server (default: `5000`, Railway injects automatically) | ✅ |
-| `DATABASE_URL` | Connection string PostgreSQL Supabase (Transaction Pooler) | ✅ |
-| `DIRECT_URL` | Connection string PostgreSQL Supabase Direct (Session Pooler) | ✅ |
-| `JWT_ACCESS_SECRET` | Secret key untuk sign access token (min 32 chars) | ✅ |
-| `JWT_REFRESH_SECRET` | Secret key untuk sign refresh token (min 32 chars) | ✅ |
-| `FRONTEND_URL` | URL aplikasi frontend (untuk CORS & email links) | ✅ |
+| `NODE_ENV` | `development` / `production` | ✅ |
+| `PORT` | Port server (default: `5000`) | ✅ |
+| `DATABASE_URL` | Connection string PostgreSQL (Transaction Pooler) | ✅ |
+| `DIRECT_URL` | Connection string PostgreSQL (Session Pooler) | ✅ |
+| `JWT_ACCESS_SECRET` | Secret key access token (min 32 chars) | ✅ |
+| `JWT_REFRESH_SECRET` | Secret key refresh token (min 32 chars) | ✅ |
+| `FRONTEND_URL` | URL frontend (untuk CORS & email links) | ✅ |
 | `SUPABASE_URL` | URL proyek Supabase | ✅ |
 | `SUPABASE_SERVICE_KEY` | Service role key Supabase (bukan anon key) | ✅ |
 | `GEMINI_API_KEY` | API Key Google Gemini AI Studio | ✅ |
@@ -85,86 +94,115 @@ Server akan aktif di `http://localhost:5000`.
 | `MIDTRANS_CLIENT_KEY` | Client Key Midtrans | ✅ |
 | `MIDTRANS_IS_PRODUCTION` | Mode Midtrans (`false` = Sandbox) | ✅ |
 | `RESEND_API_KEY` | API Key Resend Email Service | ✅ |
-| `SENTRY_DSN` | Sentry DSN untuk error tracking (opsional) | ❌ |
+| `SENTRY_DSN` | Sentry DSN error tracking (opsional) | ❌ |
+
+---
+
+## 📑 Akun Demo (Hasil Seeding)
+
+| Role | Email | Password | Keterangan |
+|------|-------|----------|------------|
+| **Petani (FARMER)** | `petani@jadipetani.com` | `farmer123` | Pak Budi Sugiharto — Lembang, Bandung Barat |
+| **Pelajar (STUDENT)** | `pelajar@jadipetani.com` | `student123` | Ahmad Rizky — IPB University |
+
+---
+
+## 🧪 Spesifikasi Lingkungan Pengujian
+
+| Komponen | Spesifikasi |
+|----------|-------------|
+| **OS** | Windows 11 / macOS 14+ / Ubuntu 22.04 |
+| **Node.js** | v20.18.0 |
+| **npm** | v10.8.2 |
+| **Database** | PostgreSQL 15 (Supabase) |
+| **API Base URL (Dev)** | `http://localhost:5000/api` |
+| **API Base URL (Prod)** | `https://be-jadipetani-production.up.railway.app/api` |
+| **Midtrans** | Sandbox Mode |
 
 ---
 
 ## 🔗 Endpoint Utama API
 
-### 1. Health & Landing
+### Health & Landing
 - `GET /api/health` — Health check server
-- `GET /api/landing/stats` — Statistik publik platform (petani, pelajar, program magang)
+- `GET /api/landing/stats` — Statistik publik platform
 
-### 2. Authentication (`/api/auth`)
-- `POST /api/auth/register` — Registrasi user (`FARMER` / `STUDENT`)
-- `POST /api/auth/login` — Login user (dikembalikan access token + set refresh token cookie)
-- `POST /api/auth/refresh-token` — Perbarui access token via httpOnly cookie
-- `POST /api/auth/logout` — Logout user (hapus refresh cookie)
+### Authentication (`/api/auth`)
+- `POST /api/auth/register` — Registrasi user (FARMER / STUDENT)
+- `POST /api/auth/login` — Login (access token + refresh cookie)
+- `POST /api/auth/refresh-token` — Perbarui access token
+- `POST /api/auth/logout` — Logout (hapus refresh cookie)
 - `POST /api/auth/forgot-password` — Kirim email reset password
 - `POST /api/auth/reset-password` — Reset password dengan token
-- `GET /api/auth/me` — Dapatkan data user yang sedang login
+- `GET /api/auth/me` — Data user yang login
 
-### 3. Internship & Curriculum (`/api/internships`)
+### Internship & Curriculum (`/api/internships`)
 - `GET /api/internships` — List lowongan magang publik (search, filter, pagination)
-- `GET /api/internships/my` — List lowongan milik petani login
-- `GET /api/internships/:id` — Detail lowongan magang beserta kurikulum
-- `POST /api/internships` — Buat lowongan magang (DRAFT/ACTIVE)
-- `PUT /api/internships/:id` — Edit lowongan magang
-- `PATCH /api/internships/:id/publish` — Publikasikan lowongan draft
-- `DELETE /api/internships/:id` — Hapus soft-delete lowongan
-- `POST /api/internships/:id/curriculum/generate` — Generate kurikulum terstruktur via Gemini AI
-- `PUT /api/internships/:id/curriculum` — Edit manual kurikulum mingguan
+- `GET /api/internships/my` — List lowongan milik petani
+- `GET /api/internships/:id` — Detail lowongan + kurikulum
+- `POST /api/internships` — Buat lowongan magang
+- `PUT /api/internships/:id` — Edit lowongan
+- `PATCH /api/internships/:id/publish` — Publikasikan lowongan
+- `DELETE /api/internships/:id` — Hapus lowongan
+- `POST /api/internships/:id/curriculum/generate` — Generate kurikulum AI (Gemini)
+- `PUT /api/internships/:id/curriculum` — Edit kurikulum manual
 
-### 4. Applications (`/api/internships` & `/api/applications`)
-- `POST /api/internships/:id/apply` — Melamar magang (+ upload CV PDF max 5MB)
-- `GET /api/internships/:id/applicants` — List pendaftar lowongan (Petani)
-- `GET /api/applications/:id` — Detail lamaran (+ signed URL download CV/portfolio)
-- `PATCH /api/applications/:id/accept` — Terima pendaftar (kuota di-enforce, logbook otomatis terbuat)
-- `PATCH /api/applications/:id/reject` — Tolak pendaftar (+ notifikasi email)
+### Applications (`/api/internships` & `/api/applications`)
+- `POST /api/internships/:id/apply` — Melamar magang (+ upload CV)
+- `GET /api/internships/:id/applicants` — List pendaftar (Petani)
+- `GET /api/applications/:id` — Detail lamaran
+- `PATCH /api/applications/:id/accept` — Terima pendaftar
+- `PATCH /api/applications/:id/reject` — Tolak pendaftar
 - `PATCH /api/applications/:id/cancel` — Batalkan lamaran (Pelajar)
 
-### 5. Logbook & Evaluation (`/api/logbook` & `/api/evaluations`)
-- `GET /api/internships/:id/logbook?applicationId=xxx` — Summary progress logbook mingguan
-- `GET /api/logbook/:entryId` — Detail logbook satu minggu (checklist + foto bukti)
-- `PATCH /api/logbook/:entryId` — Simpan progress checklist & refleksi (Pelajar)
-- `POST /api/logbook/:entryId/documentation` — Upload foto bukti kegiatan
+### Logbook & Evaluation (`/api/logbook` & `/api/evaluations`)
+- `GET /api/internships/:id/logbook` — Summary logbook mingguan
+- `GET /api/logbook/:entryId` — Detail logbook satu minggu
+- `PATCH /api/logbook/:entryId` — Simpan progress & refleksi
+- `POST /api/logbook/:entryId/documentation` — Upload foto bukti
 - `DELETE /api/logbook/documentation/:docId` — Hapus foto bukti
-- `GET /api/internships/:id/evaluations/:applicationId` — Dashboard evaluasi peserta (Petani)
-- `PATCH /api/evaluations/:id/grade` — Simpan skor (1-100) & catatan mingguan
-- `POST /api/internships/:id/evaluations/:appId/ai-summary` — Generate ringkasan evaluasi AI
-- `POST /api/internships/:id/evaluations/:appId/graduate` — Luluskan peserta & terbitkan Sertifikat PDF
+- `GET /api/internships/:id/evaluations/:applicationId` — Dashboard evaluasi
+- `PATCH /api/evaluations/:id/grade` — Simpan skor & catatan
+- `POST /api/internships/:id/evaluations/:appId/ai-summary` — Ringkasan evaluasi AI
+- `POST /api/internships/:id/evaluations/:appId/graduate` — Luluskan & terbitkan sertifikat
 
-### 6. Certificates (`/api/certificates`)
-- `GET /api/certificates/my` — List sertifikat milik pelajar
+### Certificates (`/api/certificates`)
+- `GET /api/certificates/my` — List sertifikat pelajar
 - `GET /api/certificates/:id` — Detail sertifikat
-- `GET /api/certificates/:id/download` — Download PDF sertifikat dari Supabase Storage
+- `GET /api/certificates/:id/download` — Download PDF sertifikat
 
-### 7. Job Connector & Midtrans Payment (`/api/jobs` & `/api/payments`)
-- `POST /api/jobs` — Buat lowongan kerja profesional (Placement Fee 50% dihitung di backend + initiate Midtrans Snap)
-- `GET /api/jobs` — List lowongan kerja publik (`PUBLISHED` saja)
-- `GET /api/jobs/my` — List lowongan kerja milik petani (semua status)
-- `POST /api/jobs/:id/retry-payment` — Generate token Midtrans baru untuk payment retry
-- `PATCH /api/jobs/:id/close` — Tutup lowongan kerja profesional
-- `POST /api/payments/midtrans/callback` — Webhook listener Midtrans (verifikasi signature SHA512 & idempotency)
-- `POST /api/payments/midtrans/reconcile` — Rekonsiliasi manual status pembayaran
+### Job Connector & Payment (`/api/jobs` & `/api/payments`)
+- `POST /api/jobs` — Buat lowongan kerja (+ Midtrans Snap)
+- `GET /api/jobs` — List lowongan kerja publik
+- `GET /api/jobs/my` — List lowongan milik petani
+- `POST /api/jobs/:id/retry-payment` — Retry payment Midtrans
+- `PATCH /api/jobs/:id/close` — Tutup lowongan
+- `POST /api/payments/midtrans/callback` — Webhook Midtrans
+- `POST /api/payments/midtrans/reconcile` — Rekonsiliasi manual
 
 ---
 
-## 🚆 Deployment ke Railway
+## 🚆 Deployment (Railway)
 
-1. Push repository ini ke GitHub.
-2. Buat proyek baru di **[Railway.app](https://railway.app)** -> **"Deploy from GitHub repo"**.
-3. Buka tab **Variables** di Railway dan masukkan variabel dari `.env` (tanpa `PORT`).
-4. Buka **Settings** -> **Public Networking** -> Klik **"Generate Domain"**.
-5. Salin URL publik Railway dan daftarkan ke **Midtrans Dashboard** -> **Payment Notification URL**:
+1. Push repository ke GitHub
+2. Buat proyek di **[Railway.app](https://railway.app)** → Deploy from GitHub repo
+3. Isi **Variables** di Railway (tanpa `PORT`)
+4. Buka **Settings** → **Public Networking** → Generate Domain
+5. Daftarkan URL ke **Midtrans Dashboard** → Payment Notification URL:
    `https://<your-railway-domain>/api/payments/midtrans/callback`
 
 ---
 
-## 🔒 Fitur Keamanan (Security Matrix)
+## 🔒 Keamanan
 
-- **Password Hashing**: `bcrypt` dengan 12 salt rounds.
-- **Session Security**: JWT Access Token (1 jam) + Refresh Token di `httpOnly, Secure, SameSite=Strict` Cookie.
-- **Rate Limiting**: Limiter khusus di endpoint sensitif (10 req/15 menit untuk auth, 100 req/15 menit global API).
-- **Payment Security**: Verifikasi SHA512 `signature_key` dari Midtrans + Idempotency check untuk mencegah pemrosesan webhook ganda.
-- **File Upload Security**: Pembatasan MIME type & ukuran maks 5MB, penamaan acak UUID v4, file tersimpan privat di Supabase Storage dengan access via Signed URL.
+- **Password**: Hashing bcrypt (12 salt rounds)
+- **Session**: JWT Access Token (1 jam) + Refresh Token httpOnly Cookie (30 hari)
+- **Rate Limiting**: 10 req/15 menit (auth) — 100 req/15 menit (global)
+- **Payment**: Verifikasi SHA512 signature Midtrans + Idempotency check
+- **Upload**: Validasi MIME type, maks 5MB, UUID v4, penyimpanan privat Supabase
+
+---
+
+## 📄 Lisensi
+
+Proyek ini dikembangkan untuk keperluan akademik.
